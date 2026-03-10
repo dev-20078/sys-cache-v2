@@ -1,2 +1,93 @@
 # sys-cache-v2
 Testing static deployment
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta name="robots" content="noindex, nofollow">
+<title>System Page</title>
+
+<style>
+
+body{
+background:black;
+color:white;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+font-family:Arial;
+}
+
+#login{
+display:none;
+text-align:center;
+color:#d4af37;
+}
+
+input{
+padding:10px;
+margin-top:10px;
+}
+
+button{
+padding:10px 20px;
+margin-top:10px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div id="normal">
+Loading system resources...
+</div>
+
+<div id="login">
+<h2>Maloote, enter the password please</h2>
+
+<input type="password" id="pass">
+
+<br>
+
+<button onclick="check()">Enter</button>
+
+<p id="error"></p>
+
+</div>
+
+<script>
+
+let taps = 0;
+
+document.body.addEventListener("click", function(){
+
+taps++;
+
+if(taps == 5){
+document.getElementById("normal").style.display="none";
+document.getElementById("login").style.display="block";
+}
+
+});
+
+function check(){
+
+var p = document.getElementById("pass").value;
+
+if(p === "fakru"){
+window.location.href="page2.html";
+}
+
+else{
+document.getElementById("error").innerText="Access Denied";
+}
+
+}
+
+</script>
+
+</body>
+</html>
