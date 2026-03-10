@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+
+body{
+margin:0;
+background:#000;
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+color:#777;
+font-family:Arial;
+}
+
+</style>
+</head>
+
+<body onclick="tap()">
+
+Tap the screen
+
+<script>
+
+var taps=0;
+
+function tap(){
+
+taps++;
+
+if(taps==5){
+
+window.location="password.html";
+
+}
+
+}
+
+</script>
+
+</body>
+</html>
