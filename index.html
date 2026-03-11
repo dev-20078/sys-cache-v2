@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+
+body{
+margin:0;
+background:black;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+font-family:Arial;
+color:#d4af37;
+overflow:hidden;
+}
+
+.logo{
+font-size:38px;
+letter-spacing:4px;
+animation:glow 2s infinite alternate;
+}
+
+@keyframes glow{
+from{opacity:0.5}
+to{opacity:1}
+}
+
+canvas{
+position:absolute;
+top:0;
+left:0;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="logo">MALOOTE</div>
+
+<canvas id="canvas"></canvas>
+
+<script>
+
+const canvas=document.getElementById("canvas");
+const ctx=canvas.getContext("2d");
+
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
+
+let drawing=false;
+let path="";
+
+canvas.addEventListener("touchstart",()=>{
+drawing=true;
+path="";
+});
+
+canvas.addEventListener("touchmove",(e)=>{
+
+if(!drawing) return;
+
+let t=e.touches[0];
+
+ctx.lineWidth=3;
+ctx.strokeStyle="#d4af37";
+ctx.lineTo(t.clientX,t.clientY);
+ctx.stroke();
+
+/* direction capture */
+
+path+=Math.round(t.clientX/50)+","+Math.round(t.clientY/50)+"|";
+
+});
+
+canvas.addEventListener("touchend",async ()=>{
+
+drawing=false;
+ctx.clearRect(0,0,canvas.width,canvas.height);
+
+let hash=await sha256(path);
+
+/* hidden correct hash */
+
+if(hash==="c5f9b21f2a4c8c73a6d8e92c3cdbf6e93b8a2d7e9c7f1c5b6a8e2d9f7c3a1e5"){
+
+window.location="password.html";
+
+}
+
+});
+
+async function sha256(str){
+
+const buf=new TextEncoder().encode(str);
+
+const digest=await crypto.subtle.digest("SHA-256",buf);
+
+return Array.from(new Uint8Array(digest))
+.map(b=>b.toString(16).padStart(2,"0"))
+.join("");
+
+}
+
+</script>
+
+</body>
+</html>
