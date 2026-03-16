@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+
+body{
+margin:0;
+height:100vh;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+background-image:url("bg.jpg");
+background-size:cover;
+background-position:center;
+color:white;
+font-family:Arial;
+text-align:center;
+}
+
+.title{
+font-size:52px;
+color:#ffd700;
+font-family:Georgia,serif;
+}
+
+.subtitle{
+margin-bottom:30px;
+}
+
+.timer{
+font-size:40px;
+color:white;
+}
+
+.red{
+color:red;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="title">MALOOTE</div>
+<div class="subtitle">aap zara jaldi aagaye</div>
+
+<div class="timer" id="count"></div>
+
+<script>
+
+if(sessionStorage.getItem("unlock")!=="maloote"){
+window.location="404.html";
+}
+
+const target=new Date("Apr 29, 2026 00:00:00 GMT+0530").getTime();
+
+setInterval(function(){
+
+const now=new Date().getTime();
+
+const diff=target-now;
+
+let d=Math.floor(diff/(1000*60*60*24));
+let h=Math.floor((diff%(1000*60*60*24))/(1000*60*60));
+let m=Math.floor((diff%(1000*60*60))/(1000*60));
+let s=Math.floor((diff%(1000*60))/1000);
+
+document.getElementById("count").innerHTML=
+"<span class='red'>"+d+"</span>d "+
+"<span class='red'>"+h+"</span>h "+
+"<span class='red'>"+m+"</span>m "+
+"<span class='red'>"+s+"</span>s";
+
+if(now>=target){
+window.location="page4.html";
+}
+
+},1000);
+
+</script>
+
+</body>
+</html>
