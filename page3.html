@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Special</title>
+
+<style>
+body{
+margin:0;
+height:100vh;
+font-family:Segoe UI;
+display:flex;
+justify-content:center;
+align-items:center;
+text-align:center;
+color:white;
+overflow:hidden;
+
+/* EXACT BACKGROUND */
+background:url('bg.jpg') no-repeat center center/cover;
+}
+
+/* overlay glow */
+.overlay{
+position:absolute;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.4);
+}
+
+/* main box */
+.box{
+z-index:2;
+}
+
+/* MALOOTE title */
+.title{
+font-size:42px;
+font-weight:900;
+background:linear-gradient(45deg,gold,#fff,gold);
+-webkit-background-clip:text;
+color:transparent;
+text-shadow:0 0 15px gold;
+animation:glow 2s infinite alternate;
+}
+
+@keyframes glow{
+from{ text-shadow:0 0 10px gold; }
+to{ text-shadow:0 0 25px gold; }
+}
+
+/* subtitle */
+.sub{
+margin-top:10px;
+font-size:18px;
+color:#fff;
+text-shadow:0 0 10px white;
+}
+
+/* TIMER CAKE STYLE */
+.timer{
+margin-top:25px;
+padding:20px;
+background:rgba(0,0,0,0.6);
+border-radius:20px;
+box-shadow:0 0 20px gold;
+}
+
+.time{
+font-size:20px;
+margin-top:10px;
+}
+
+/* OPEN BUTTON */
+#openBtn{
+display:none;
+margin-top:20px;
+padding:12px 25px;
+border:none;
+border-radius:12px;
+background:linear-gradient(45deg,gold,green);
+color:#000;
+font-weight:bold;
+font-size:16px;
+box-shadow:0 0 15px gold;
+animation:shine 1.5s infinite;
+}
+
+@keyframes shine{
+0%{box-shadow:0 0 10px gold}
+50%{box-shadow:0 0 25px gold}
+100%{box-shadow:0 0 10px gold}
+}
+
+/* floating particles */
+.particle{
+position:absolute;
+width:8px;
+height:8px;
+background:gold;
+border-radius:50%;
+opacity:0.7;
+animation:float 6s linear infinite;
+}
+
+@keyframes float{
+from{transform:translateY(100vh)}
+to{transform:translateY(-10vh)}
+}
+</style>
+</head>
+
+<body>
+
+<div class="overlay"></div>
+
+<div class="box">
+<div class="title">MALOOTE</div>
+<div class="sub">aap zara jaldi aagaye</div>
+
+<div class="timer">
+🎂 Countdown
+<div class="time" id="time"></div>
+</div>
+
+<button id="openBtn" onclick="openPage()">OPEN</button>
+</div>
+
+<script>
+// 🎯 TARGET DATE (IST)
+var target = new Date("April 29, 2026 00:00:00").getTime();
+
+var timer = setInterval(function(){
+var now = new Date().getTime();
+var diff = target - now;
+
+if(diff <= 0){
+clearInterval(timer);
+document.getElementById("time").innerHTML="It's Time 🎉";
+document.getElementById("openBtn").style.display="inline-block";
+}else{
+var d = Math.floor(diff/(1000*60*60*24));
+var h = Math.floor((diff%(1000*60*60*24))/(1000*60*60));
+var m = Math.floor((diff%(1000*60*60))/(1000*60));
+var s = Math.floor((diff%(1000*60))/1000);
+
+document.getElementById("time").innerHTML=
+d+"d "+h+"h "+m+"m "+s+"s";
+}
+},1000);
+
+// open page4
+function openPage(){
+window.location.href="page4.html";
+}
+
+// particles generate
+for(let i=0;i<30;i++){
+let p=document.createElement("div");
+p.className="particle";
+p.style.left=Math.random()*100+"%";
+p.style.animationDuration=(3+Math.random()*5)+"s";
+document.body.appendChild(p);
+}
+</script>
+
+</body>
+</html>
