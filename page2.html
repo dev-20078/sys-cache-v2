@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Private Access</title>
+
+<style>
+body{
+margin:0;
+height:100vh;
+background:#000;
+display:flex;
+justify-content:center;
+align-items:center;
+font-family:'Segoe UI', sans-serif;
+overflow:hidden;
+}
+
+/* Golden Sprinkles */
+body::before{
+content:"";
+position:absolute;
+width:100%;
+height:100%;
+background:radial-gradient(gold 1px, transparent 1px);
+background-size:25px 25px;
+animation:move 10s linear infinite;
+opacity:0.2;
+}
+
+@keyframes move{
+0%{transform:translateY(0)}
+100%{transform:translateY(120px)}
+}
+
+/* Box */
+.box{
+position:relative;
+padding:35px 25px;
+border-radius:20px;
+background:rgba(0,0,0,0.85);
+border:2px solid gold;
+box-shadow:0 0 25px gold, inset 0 0 15px gold;
+text-align:center;
+width:85%;
+max-width:320px;
+}
+
+/* Title */
+.title{
+font-size:38px;
+font-weight:800;
+background:linear-gradient(45deg,#FFD700,#fff,#FFD700);
+-webkit-background-clip:text;
+color:transparent;
+letter-spacing:4px;
+}
+
+/* Subtitle */
+.sub{
+margin-top:10px;
+color:#bbb;
+font-size:15px;
+}
+
+/* Input */
+input{
+margin-top:20px;
+padding:12px;
+width:90%;
+border:none;
+border-radius:8px;
+outline:none;
+font-size:16px;
+background:#111;
+color:#fff;
+box-shadow:0 0 8px rgba(255,215,0,0.4);
+}
+
+/* Button */
+button{
+margin-top:18px;
+padding:12px 25px;
+border:none;
+border-radius:10px;
+font-weight:bold;
+font-size:16px;
+background:linear-gradient(45deg,gold,green);
+color:#000;
+cursor:pointer;
+box-shadow:0 0 12px gold;
+}
+
+/* Error */
+#error{
+margin-top:12px;
+color:red;
+display:none;
+font-weight:bold;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="box">
+<div class="title">MALOOTE</div>
+<div class="sub">enter the password please</div>
+
+<input type="password" id="pass" placeholder="Enter Password">
+<br>
+<button onclick="check()">UNLOCK</button>
+
+<div id="error">ACCESS DENIED</div>
+</div>
+
+<!-- Audio -->
+<audio id="errSound" src="error.mp3"></audio>
+<audio id="unlockSound" src="unlock.mp3"></audio>
+
+<script>
+(function(){
+var _x="RmFLclU0Nzc4"; // encoded password
+
+window.check=function(){
+var v=document.getElementById("pass").value;
+
+if(btoa(v)===_x){
+document.getElementById("unlockSound").play();
+setTimeout(()=>{
+window.location.href="page3.html";
+},700);
+}else{
+document.getElementById("error").style.display="block";
+document.getElementById("errSound").play();
+}
+}
+})();
+</script>
+
+</body>
+  </html>
