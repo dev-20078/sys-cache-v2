@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Special</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+
+body{
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+font-family:Segoe UI;
+text-align:center;
+color:white;
+overflow:hidden;
+
+background-image:url("bg.jpg?v=20");
+background-size:cover;
+background-position:center;
+background-repeat:no-repeat;
+}
+
+.box{z-index:2;}
+
+/* Title */
+.title{
+font-size:42px;
+font-weight:900;
+background:linear-gradient(45deg,gold,#fff,gold);
+-webkit-background-clip:text;
+color:transparent;
+text-shadow:0 0 25px gold;
+}
+
+/* Subtitle */
+.sub{
+margin-top:10px;
+font-size:18px;
+text-shadow:0 0 10px white;
+}
+
+/* Cake */
+.cake{
+margin-top:25px;
+display:flex;
+flex-direction:column;
+align-items:center;
+}
+
+.candles{
+display:flex;
+gap:8px;
+margin-bottom:5px;
+}
+
+.flame{
+width:8px;
+height:15px;
+background:gold;
+border-radius:50%;
+box-shadow:0 0 15px gold;
+animation:flicker 0.3s infinite alternate;
+}
+
+@keyframes flicker{
+from{transform:scale(1)}
+to{transform:scale(1.2)}
+}
+
+.cake-body{
+background:linear-gradient(45deg,#3a2a1a,#5a3a1f);
+padding:20px 25px;
+border-radius:15px;
+border:2px solid gold;
+box-shadow:0 0 20px gold;
+}
+
+.cake-body::before{
+content:"";
+display:block;
+width:100%;
+height:8px;
+background:white;
+border-radius:5px;
+margin-bottom:10px;
+}
+
+#time{
+font-size:18px;
+text-shadow:0 0 10px gold;
+}
+
+/* Button */
+#openBtn{
+display:none;
+margin-top:20px;
+padding:12px 25px;
+border:none;
+border-radius:12px;
+background:linear-gradient(45deg,gold,green);
+color:#000;
+font-weight:bold;
+box-shadow:0 0 15px gold;
+animation:shine 1.5s infinite;
+}
+
+@keyframes shine{
+0%{box-shadow:0 0 10px gold}
+50%{box-shadow:0 0 25px gold}
+100%{box-shadow:0 0 10px gold}
+}
+</style>
+</head>
+
+<body>
+
+<div class="box">
+<div class="title">MALOOTE</div>
+<div class="sub">aap zara jaldi aagaye</div>
+
+<div class="cake">
+  <div class="candles">
+    <div class="flame"></div>
+    <div class="flame"></div>
+    <div class="flame"></div>
+  </div>
+
+  <div class="cake-body">
+    <div id="time"></div>
+  </div>
+</div>
+
+<button id="openBtn" onclick="openPage()">OPEN</button>
+</div>
+
+<script>
+
+// 🎯 TARGET (LOCAL TIME SAFE)
+var target = new Date(2026, 3, 29, 0, 0, 0).getTime();
+// (month 3 = April, JS starts from 0)
+
+// 🔥 MAIN FUNCTION (FAIL SAFE)
+function update(){
+  var now = new Date().getTime();
+  var diff = target - now;
+
+  if(diff <= 0){
+    document.getElementById("time").innerHTML="It's Time 🎉";
+    document.getElementById("openBtn").style.display="inline-block";
+  } else {
+    var d=Math.floor(diff/(1000*60*60*24));
+    var h=Math.floor((diff%(1000*60*60*24))/(1000*60*60));
+    var m=Math.floor((diff%(1000*60*60))/(1000*60));
+    var s=Math.floor((diff%(1000*60))/1000);
+
+    document.getElementById("time").innerHTML=
+    d+"d "+h+"h "+m+"m "+s+"s";
+  }
+}
+
+// 🔁 Run every second
+setInterval(update,1000);
+
+// ⚡ EXTRA FAILSAFE (on reload)
+update();
+
+// Open page 4
+function openPage(){
+  window.location.href="page4.html";
+}
+
+</script>
+
+</body>
+  </html>
