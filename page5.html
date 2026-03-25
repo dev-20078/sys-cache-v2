@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+height:100vh;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+text-align:center;
+font-family:Arial;
+overflow:hidden;
+background:url("bg5.jpg") no-repeat center/cover;
+padding:20px;
+}
+
+/* TITLE */
+.title{
+font-size:28px;
+font-weight:bold;
+color:white;
+text-shadow:0 0 10px gold,0 0 20px gold;
+}
+
+/* NAME */
+.name{
+margin-top:10px;
+font-size:34px;
+font-weight:bold;
+color:#4da6ff;
+text-shadow:0 0 10px #4da6ff,0 0 20px #4da6ff;
+}
+
+/* CAKE */
+.cake{
+margin-top:20px;
+width:220px;
+}
+
+/* MESSAGE */
+.msg{
+margin-top:20px;
+font-size:18px;
+color:silver;
+text-shadow:0 0 8px silver,0 0 15px white;
+max-width:90%;
+}
+
+/* TAP TEXT */
+.tap{
+margin-top:12px;
+font-size:14px;
+color:black;
+text-shadow:0 0 5px white,0 0 10px gold;
+animation:blink 1.2s infinite;
+}
+
+@keyframes blink{
+0%{opacity:1;}
+50%{opacity:0.3;}
+100%{opacity:1;}
+}
+
+/* NEXT BUTTON */
+#nextBtn{
+display:none;
+margin-top:15px;
+padding:12px 25px;
+border:none;
+border-radius:12px;
+font-size:16px;
+font-weight:bold;
+background:linear-gradient(45deg,#00bfff,#4da6ff);
+color:white;
+box-shadow:0 0 10px #00bfff,0 0 20px #00bfff;
+}
+</style>
+</head>
+
+<body onclick="startMusic()">
+
+<div class="title">🥳HAPPY BIRTHDAY🥳</div>
+
+<div class="name">💙DEAR MALOOTE💙</div>
+
+<img src="cake.gif" class="cake">
+
+<div class="msg">
+ALLAH AAPKO DUNIYA KI SAARI KHUSHIYAN AUR KAMIYABI DE 🤍🤍
+</div>
+
+<div id="tapText" class="tap">✨ Tap the screen ✨</div>
+
+<button id="nextBtn" onclick="goNext()">NEXT</button>
+
+<!-- MUSIC -->
+<audio id="music" loop>
+<source src="final.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+
+let started=false;
+
+function startMusic(){
+if(!started){
+document.getElementById("music").play();
+started=true;
+}
+}
+
+/* 30 SECOND DELAY */
+setTimeout(()=>{
+document.getElementById("tapText").style.display="none";
+document.getElementById("nextBtn").style.display="inline-block";
+},30000);
+
+/* NEXT PAGE */
+function goNext(){
+window.location.href="page6.html";
+}
+
+</script>
+
+</body>
+</html>
