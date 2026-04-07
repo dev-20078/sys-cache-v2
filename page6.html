@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Operation Start</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div id="introScreen">
+
+<div class="terminal">
+<pre id="storyText"></pre>
+</div>
+
+<button id="startBtn">START MISSION</button>
+
+</div>
+
+
+<div id="gameScreen">
+
+<div id="levelText"></div>
+
+<canvas id="gameCanvas"></canvas>
+
+<div id="grid">
+<div class="tile" data-id="1"></div>
+<div class="tile" data-id="2"></div>
+<div class="tile" data-id="3"></div>
+<div class="tile" data-id="4"></div>
+<div class="tile" data-id="5"></div>
+<div class="tile" data-id="6"></div>
+<div class="tile" data-id="7"></div>
+<div class="tile" data-id="8"></div>
+<div class="tile" data-id="9"></div>
+</div>
+
+<div id="winText"></div>
+
+<button id="rewardBtn">CLAIM REWARD</button>
+<button id="nextBtn">NEXT</button>
+
+</div>
+
+<script src="game.js"></script>
+
+</body>
+</html>
