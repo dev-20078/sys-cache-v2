@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+
+body{
+height:100vh;
+overflow:hidden;
+font-family:Arial;
+background:black;
+}
+
+/* BACKGROUND */
+#bg{
+position:fixed;
+width:110%;
+height:110%;
+left:-5%;
+top:-5%;
+background:url("bg6.jpg") center/cover no-repeat;
+animation:zoom 20s linear infinite alternate;
+z-index:-1;
+}
+
+@keyframes zoom{
+from{transform:scale(1)}
+to{transform:scale(1.2)}
+}
+
+/* QUESTION */
+#question{
+position:absolute;
+top:18%;
+width:100%;
+text-align:center;
+color:white;
+font-size:28px;
+padding:0 20px;
+text-shadow:0 0 10px white,0 0 20px white;
+}
+
+/* BUTTONS */
+#buttons{
+position:absolute;
+top:55%;
+width:100%;
+display:flex;
+justify-content:center;
+gap:25px;
+}
+
+.btn{
+padding:16px 36px;
+border:none;
+border-radius:18px;
+font-size:20px;
+color:white;
+transition:.3s;
+}
+
+/* YES */
+#yes{
+background:linear-gradient(45deg,#00cc66,#00ff99);
+box-shadow:0 0 20px #00ff99;
+}
+
+/* NO */
+#no{
+background:linear-gradient(45deg,#ff0033,#ff4d6d);
+box-shadow:0 0 20px #ff0033;
+position:absolute;
+}
+
+/* NEXT */
+#next{
+position:absolute;
+bottom:20px;
+left:20px;
+display:none;
+padding:12px 22px;
+border:none;
+border-radius:12px;
+background:#00bfff;
+color:white;
+box-shadow:0 0 20px #00bfff;
+}
+
+/* INFINITY */
+#infinity{
+display:none;
+position:absolute;
+width:100%;
+height:100%;
+overflow:hidden;
+}
+
+.iqra{
+position:absolute;
+color:#ff66cc;
+font-size:26px;
+opacity:.8;
+text-shadow:0 0 10px #ff66cc;
+}
+</style>
+</head>
+
+<body>
+
+<div id="bg"></div>
+
+<div id="question">
+WANNA KNOW HOW MANY TIMES I ADMIRED YOU?
+</div>
+
+<div id="buttons">
+<button id="yes" class="btn">YES</button>
+<button id="no" class="btn">NO</button>
+</div>
+
+<button id="next">NEXT</button>
+
+<div id="infinity"></div>
+
+<audio id="music" src="infinity.mp3" loop></audio>
+
+<script>
+
+let yes=document.getElementById("yes");
+let no=document.getElementById("no");
+let next=document.getElementById("next");
+let size=1;
+
+/* bounce movement */
+let x=200,y=0,dx=2,dy=2;
+
+function bounce(){
+let w=window.innerWidth-80;
+let h=window.innerHeight-80;
+
+x+=dx;
+y+=dy;
+
+if(x<0||x>w)dx*=-1;
+if(y<0||y>h)dy*=-1;
+
+no.style.left=x+"px";
+no.style.top=y+"px";
+
+requestAnimationFrame(bounce);
+}
+bounce();
+
+/* NO click */
+no.onclick=()=>{
+size+=.12;
+yes.style.transform="scale("+size+")";
+}
+
+/* YES click */
+yes.onclick=()=>{
+
+document.getElementById("question").style.display="none";
+document.getElementById("buttons").style.display="none";
+
+startInfinity();
+fadeMusic();
+
+setTimeout(()=>{
+next.style.display="block";
+},15000);
+
+}
+
+/* floating IQRA */
+function startInfinity(){
+
+let box=document.getElementById("infinity");
+box.style.display="block";
+
+for(let i=0;i<80;i++){
+
+let t=document.createElement("div");
+t.className="iqra";
+t.innerText="IQRA";
+
+t.style.left=Math.random()*100+"%";
+t.style.top=Math.random()*100+"%";
+
+t.dataset.speed=Math.random()*0.2+0.05;
+
+box.appendChild(t);
+
+}
+
+animate();
+}
+
+function animate(){
+
+document.querySelectorAll(".iqra").forEach
