@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+margin:0;
+overflow:hidden;
+background:url("bg6.jpg") center/cover no-repeat;
+font-family:Arial;
+}
+
+/* QUESTION */
+#question{
+position:absolute;
+top:20%;
+width:100%;
+text-align:center;
+color:white;
+font-size:26px;
+text-shadow:0 0 10px white,0 0 20px white;
+}
+
+/* BUTTONS */
+#buttons{
+position:absolute;
+top:55%;
+width:100%;
+display:flex;
+justify-content:center;
+gap:20px;
+}
+
+.btn{
+padding:12px 24px;
+border:none;
+border-radius:10px;
+font-size:18px;
+color:white;
+}
+
+#yes{
+background:#00cc66;
+box-shadow:0 0 15px #00ff99;
+}
+
+#no{
+background:#ff0033;
+box-shadow:0 0 15px #ff0033;
+position:relative;
+}
+
+/* NEXT */
+#next{
+position:absolute;
+bottom:20px;
+left:20px;
+display:none;
+padding:12px 20px;
+background:#00bfff;
+color:white;
+border:none;
+border-radius:10px;
+box-shadow:0 0 15px #00bfff;
+}
+
+/* INFINITY */
+#infinity{
+display:none;
+position:absolute;
+width:100%;
+height:100%;
+overflow:hidden;
+}
+
+.text{
+position:absolute;
+color:#ff66cc;
+font-size:28px;
+text-shadow:0 0 10px #ff66cc,0 0 20px #ff66cc;
+}
+</style>
+</head>
+
+<body>
+
+<div id="question">
+WANNA KNOW HOW MANY TIMES I ADMIRED YOU?
+</div>
+
+<div id="buttons">
+<button id="yes" class="btn">YES</button>
+<button id="no" class="btn">NO</button>
+</div>
+
+<button id="next">NEXT</button>
+
+<div id="infinity"></div>
+
+<audio id="music" src="infinity.mp3" loop></audio>
+
+<script>
+
+let yes=document.getElementById("yes");
+let no=document.getElementById("no");
+let next=document.getElementById("next");
+
+let size=1;
+
+/* NO CLICK */
+no.onclick=function(){
+
+size+=0.15;
+yes.style.transform="scale("+size+")";
+
+let x=Math.random()*80;
+let y=Math.random()*80;
+
+no.style.position="absolute";
+no.style.left=x+"%";
+no.style.top=y+"%";
+}
+
+/* YES CLICK */
+yes.onclick=function(){
+
+document.getElementById("question").style.display="none";
+document.getElementById("buttons").style.display="none";
+
+startInfinity();
+
+/* PLAY MUSIC */
+document.getElementById("music").play();
+
+/* SHOW NEXT AFTER 15 SEC */
+setTimeout(()=>{
+next.style.display="block";
+},15000);
+
+}
+
+/* INFINITY */
+function startInfinity(){
+
+let box=document.getElementById("infinity");
+box.style.display="block";
+
+for(let i=0;i<250;i++){
+
+let t=document.createElement("div");
+t.className="text";
+t.innerText="IQRA";
+
+t.style.left=Math.random()*100+"%";
+t.style.top=Math.random()*100+"%";
+
+t.dataset.speed=Math.random()*0.4+0.2;
+
+box.appendChild(t);
+
+}
+
+animate();
+}
+
+/* ANIMATION */
+function animate(){
+
+let texts=document.querySelectorAll(".text");
+
+texts.forEach(t=>{
+
+let y=parseFloat(t.style.top);
+y+=parseFloat(t.dataset.speed);
+
+if(y>100) y=-10;
+
+t.style.top=y+"%";
+
+});
+
+requestAnimationFrame(animate);
+}
+
+</script>
+
+</body>
+</html>
