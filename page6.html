@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For You</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&display=swap" rel="stylesheet">
+    
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #000;
+            font-family: 'Cinzel', serif;
+            user-select: none;
+        }
+
+        /* --- PHASE 1: Proposal Screen --- */
+        #proposal-screen {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url('bg6.jpg'); /* Your background image */
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .main-text {
+            color: #fff;
+            font-size: 3rem;
+            text-align: center;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 255, 255, 0.5);
+            margin-bottom: 50px;
+            padding: 0 20px;
+        }
+
+        .button-container {
+            position: relative;
+            width: 100%;
+            height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .btn {
+            padding: 15px 40px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            font-family: inherit;
+        }
+
+        #yes-btn {
+            background-color: #28a745;
+            box-shadow: 0 0 15px #28a745, 0 0 30px #28a745;
+        }
+
+        #no-btn {
+            background-color: #dc3545;
+            box-shadow: 0 0 15px #dc3545, 0 0 30px #dc3545;
+            position: relative; /* Changes to fixed when running away */
+        }
+
+        /* --- PHASE 2: 3D Space Screen --- */
+        #space-screen {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: none; /* Hidden initially */
+            z-index: 5;
+        }
+
+        /* Interaction Hint Text */
+        #interaction-hint {
+            position: absolute;
+            bottom: 100px; /* Thoda upar rakha hai taaki next button ke saath clash na ho */
+            right: 30px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            font-family: 'Cinzel', serif;
+            text-shadow: 0 0 10px #fff;
+            z-index: 20;
+            display: none; /* Hidden initially */
+            pointer-events: none;
+            animation: pulseHint 2s infinite;
+        }
+
+        @keyframes pulseHint {
+            0% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.05); }
+            100% { opacity: 0.3; transform: scale(1); }
+        }
+
+        /* Next Button (Appears after 15s) */
+        #next-btn {
+            position: absolute;
+            bottom: -100px; /* Hidden initially */
+            left: 30px;
+            padding: 15px 40px;
+            font-size: 1.5rem;
+            font-family: 'Cinzel', serif;
+            font-weight: bold;
+            color: white;
+            background: linear-gradient(45deg, #007bff, #00d2ff);
+            border: none;
+            border-radius: 50px;
+            text-decoration: none;
+            box-shadow: 0 0 20px #00d2ff, 0 0 40px #007bff;
+            z-index: 20;
+            transition: bottom 1s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        /* Floating Emojis */
+        .floating-emoji {
+            position: absolute;
+            font-size: 2rem;
+            pointer-events: none;
+            z-index: 30;
+            animation: floatUpFade 2s ease-out forwards;
+        }
+
+        @keyframes floatUpFade {
+            0% { transform: translateY(0) scale(0.5); opacity: 1; }
+            50% { transform: translateY(-50px) scale(1.2); opacity: 1; }
+            100% { transform: translateY(-100px) scale(1); opacity: 0; }
+        }
+
+        /* Responsive Text */
+        @media (max-width: 768px) {
+            .main-text { font-size: 2rem; }
+            .btn { padding: 10px 30px; font-size: 1.2rem; }
+            #interaction-hint { font-size: 0.9rem; bottom: 80px; right: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="bg-music" src="infinity.mp3" loop preload="auto"></audio>
+
+    <div id="proposal-screen">
+        <div class="main-text">WANNA KNOW HOW MUCH I ADMIRE YOU</div>
+        <div class="button-container">
+            <button id="yes-btn" class="btn">YES</button>
+            <button id="no-btn" class="btn">NO</button>
+        </div>
+    </div>
+
+    <div id="space-screen"></div>
+
+    <div id="interaction-hint">PLAY WITH SCREEN</div>
+
+    <a id="next-btn" href="page7.html">NEXT</a>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+    <script>
+        // --- UI LOGIC ---
+        const yesBtn = document.getElementById('yes-btn');
+        const noBtn = document.getElementById('no-btn');
+        const proposalScreen = document.getElementById('proposal-screen');
+        const spaceScreen = document.getElementById('space-screen');
+        const bgMusic = document.getElementById('bg-music');
+        const nextBtn = document.getElementById('next-btn');
+        const interactionHint = document.getElementById('interaction-hint');
+
+        let yesScale = 1;
+
+        // No Button Runaway Logic
+        function moveNoButton() {
+            noBtn.style.position = 'fixed';
+            const x = Math.random() * (window.innerWidth - noBtn.offsetWidth);
+            const y = Math.random() * (window.innerHeight - noBtn.offsetHeight);
+            noBtn.style.left = `${x}px`;
+            noBtn.style.top = `${y}px`;
+            
+            // Simultaneously grow Yes button
+            yesScale += 0.2;
+            yesBtn.style.transform = `scale(${yesScale})`;
+        }
+
+        noBtn.addEventListener('mouseover', moveNoButton);
+        noBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault(); // Prevent accidental clicking on mobile
+            moveNoButton();
+        });
+
+        // Yes Button Click Logic
+        yesBtn.addEventListener('click', () => {
+            // 1. Play Music (Bulletproof Method)
+            bgMusic.play().catch((error) => console.log("Audio play blocked", error));
+            
+            // 2. Hide Proposal, Show Space
+            proposalScreen.style.opacity = '0';
+            setTimeout(() => {
+                proposalScreen.style.display = 'none';
+                spaceScreen.style.display = 'block';
+                interactionHint.style.display = 'block'; // Show hint text
+                initThreeJS(); // Start the 3D Universe
+            }, 500);
+
+            // 3. Show Next Button after 15 seconds
+            setTimeout(() => {
+                nextBtn.style.bottom = '30px';
+            }, 15000);
+        });
+
+        // Tap for Emojis Logic
+        document.body.addEventListener('click', (e) => {
+            if (spaceScreen.style.display === 'block' && e.target.id !== 'next-btn') {
+                createEmojis(e.clientX, e.clientY);
+            }
+        });
+        document.body.addEventListener('touchstart', (e) => {
+            if (spaceScreen.style.display === 'block' && e.target.id !== 'next-btn') {
+                const touch = e.touches[0];
+                createEmojis(touch.clientX, touch.clientY);
+            }
+        });
+
+        function createEmojis(x, y) {
+            const emojis = ['💖', '💕', '✨️'];
+            const container = document.createElement('div');
+            container.className = 'floating-emoji';
+            container.style.left = `${x - 20}px`;
+            container.style.top = `${y - 20}px`;
+            container.innerText = emojis.join('');
+            document.body.appendChild(container);
+
+            // Remove from DOM after animation completes
+            setTimeout(() => {
+                container.remove();
+            }, 2000);
+        }
+
+        // --- THREE.JS 3D UNIVERSE LOGIC ---
+        function initThreeJS() {
+            const scene = new THREE.Scene();
+            scene.fog = new THREE.FogExp2(0x000000, 0.0008); // Slightly lighter fog for deep space visibility
+
+            // Increased far plane so objects don't disappear when far away
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 4000);
+            camera.position.z = 400;
+
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            spaceScreen.appendChild(renderer.domElement);
+
+            // OrbitControls for dragging the space around
+            const controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.autoRotate = true; // Slowly rotates by default
+            controls.autoRotateSpeed = 0.5;
+            
+            // FIX: Limit Zoom so universe never ends
+            controls.minDistance = 50;  // Kitna paas jaa sakte hain
+            controls.maxDistance = 800; // Kitna door jaa sakte hain (edges nahi dikhenge ab)
+
+            // 1. Create Bright White Stars (Increased to 10000 for better depth)
+            const starGeometry = new THREE.BufferGeometry();
+            const starMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 2, sizeAttenuation: true });
+            const starVertices = [];
+            for (let i = 0; i < 10000; i++) {
+                const x = THREE.MathUtils.randFloatSpread(3000); // Increased spread area
+                const y = THREE.MathUtils.randFloatSpread(3000);
+                const z = THREE.MathUtils.randFloatSpread(3000);
+                starVertices.push(x, y, z);
+            }
+            starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 3));
+            const stars = new THREE.Points(starGeometry, starMaterial);
+            scene.add(stars);
+
+            // 2. Create Glowing "IQRA" Texts
+            function createIqraSprite() {
+                const canvas = document.createElement('canvas');
+                canvas.width = 256; canvas.height = 128;
+                const ctx = canvas.getContext('2d');
+                ctx.font = 'bold 60px "Cinzel", sans-serif';
+                ctx.fillStyle = '#ff66b2'; // Pink color
+                ctx.textAlign = 'center';
+                // Glow effect
+                ctx.shadowColor = '#ffb3d9';
+                ctx.shadowBlur = 20;
+                ctx.fillText('IQRA', 128, 80);
+                
+                const texture = new THREE.CanvasTexture(canvas);
+                const material = new THREE.SpriteMaterial({ map: texture, color: 0xffffff, transparent: true });
+                return new THREE.Sprite(material);
+            }
+
+            const iqraGroup = new THREE.Group();
+            // FIX: Increased IQRA count from 300 to 800 and spread them deeply
+            for (let i = 0; i < 800; i++) { 
+                const sprite = createIqraSprite();
+                sprite.position.x = THREE.MathUtils.randFloatSpread(2500); // Spread deeply in X
+                sprite.position.y = THREE.MathUtils.randFloatSpread(2500); // Spread deeply in Y
+                sprite.position.z = THREE.MathUtils.randFloatSpread(2500); // Spread deeply in Z
+                // Random scale
+                const scale = THREE.MathUtils.randFloat(10, 45);
+                sprite.scale.set(scale * 2, scale, 1);
+                iqraGroup.add(sprite);
+            }
+            scene.add(iqraGroup);
+
+            // 3. Create Comets (Moving shiny objects)
+            const comets = [];
+            const cometMaterial = new THREE.MeshBasicMaterial({ color: 0x00ffff }); // Cyan glowing comets
+            const cometGeometry = new THREE.SphereGeometry(1.5, 8, 8);
+            
+            for (let i = 0; i < 20; i++) {
+                const comet = new THREE.Mesh(cometGeometry, cometMaterial);
+                comet.position.set(
+                    THREE.MathUtils.randFloatSpread(1500),
+                    THREE.MathUtils.randFloatSpread(1500),
+                    THREE.MathUtils.randFloatSpread(1500)
+                );
+                // Assign random velocity
+                comet.velocity = new THREE.Vector3(
+                    THREE.MathUtils.randFloat(-2, 2),
+                    THREE.MathUtils.randFloat(-2, 2),
+                    THREE.MathUtils.randFloat(3, 7) // Move towards camera slightly faster
+                );
+                comets.push(comet);
+                scene.add(comet);
+            }
+
+            // Animation Loop
+            function animate() {
+                requestAnimationFrame(animate);
+                controls.update();
+
+                // Move Comets
+                comets.forEach(comet => {
+                    comet.position.add(comet.velocity);
+                    // Reset comet if it goes too far
+                    if (comet.position.z > 1000) {
+                        comet.position.z = -1500;
+                        comet.position.x = THREE.MathUtils.randFloatSpread(1500);
+                        comet.position.y = THREE.MathUtils.randFloatSpread(1500);
+                    }
+                });
+
+                // Slowly rotate the IQRA group for extra dynamic feel
+                iqraGroup.rotation.y += 0.001;
+                iqraGroup.rotation.x += 0.0005;
+
+                renderer.render(scene, camera);
+            }
+            animate();
+
+            // Handle Window Resize
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        }
+    </script>
+</body>
+  </html>
