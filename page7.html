@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Save the Dev! - Flappy Custom</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Comic+Neue:wght@700&display=swap" rel="stylesheet">
+    
+    <style>
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            overflow: hidden; background-color: #333;
+            font-family: 'Comic Neue', cursive; user-select: none;
+        }
+
+        #rules-screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.95);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 100; text-align: center; color: white;
+            transition: opacity 0.5s ease-out;
+        }
+
+        .rules-title { font-family: 'Cinzel', serif; font-size: 3rem; color: #fdfd6f; text-shadow: 0 0 10px #fdfd6f; margin-bottom: 20px; }
+        .rules-list { font-size: 1.5rem; line-height: 1.6; margin-bottom: 30px; max-width: 80%; }
+        .rules-point { margin: 10px 0; }
+        .save-me-text { font-size: 2.5rem; color: #ff6666; margin-bottom: 30px; animation: pulseError 1s infinite; }
+        
+        @keyframes pulseError { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.1); opacity: 1; } }
+
+        #start-game-btn {
+            padding: 15px 40px; font-size: 1.8rem; font-weight: bold; color: white;
+            background: linear-gradient(45deg, #1d971d, #42f442); border: none; border-radius: 50px; cursor: pointer;
+            box-shadow: 0 0 15px #42f442; transition: transform 0.2s;
+        }
+
+        #gameCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; display: none; }
+        #scoreBoard { position: absolute; top: 30px; left: 50%; transform: translateX(-50%); font-size: 4rem; color: white; text-shadow: 2px 2px 5px #000; font-weight: bold; z-index: 50; display: none; pointer-events: none; }
+
+        #win-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 100, 0.9); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 200; color: white; text-align: center;
+            padding: 20px;
+        }
+
+        /* TEXT SIZE REDUCED FOR MOBILE FITTING */
+        .win-title { 
+            font-family: 'Cinzel', serif; 
+            font-size: 2.8rem; 
+            color: #fdfd6f; 
+            margin-bottom: 15px; 
+            animation: scaleWin 1s infinite alternate; 
+            text-shadow: 0 0 10px #fdfd6f;
+        }
+        @keyframes scaleWin { from { transform: scale(1); } to { transform: scale(1.05); } }
+        .win-message { font-size: 1.5rem; margin-bottom: 40px; }
+
+        #next-page-btn {
+            position: absolute; bottom: -100px; left: 30px; padding: 15px 40px; font-size: 1.5rem; font-family: 'Cinzel', serif; font-weight: bold;
+            color: white; background: linear-gradient(45deg, #007bff, #00d2ff); border: none; border-radius: 50px; text-decoration: none;
+            box-shadow: 0 0 20px #00d2ff; z-index: 210; transition: bottom 1s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @media (max-width: 768px) {
+            .win-title { font-size: 2rem; }
+            .win-message { font-size: 1.2rem; }
+            .rules-title { font-size: 2.2rem; }
+            .rules-list { font-size: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="snd-bg" src="bg_music.mp3" loop></audio>
+    <audio id="snd-start" src="game_start.mp3"></audio>
+    <audio id="snd-jump" src="jump.mp3"></audio>
+    <audio id="snd-hit" src="hit.mp3"></audio>
+    <audio id="snd-gameover" src="game_over.mp3"></audio>
+
+    <div id="rules-screen">
+        <div class="rules-title">RULES TO BE FOLLOWED:</div>
+        <div class="rules-list">
+            <div class="rules-point">1) dev ko safe rakh na hai 🛡️</div>
+            <div class="rules-point">2) kisi ko hit nai karna hai 🚫</div>
+            <div class="rules-point">3) score 20 points to win 🏆</div>
+        </div>
+        <div class="save-me-text">PLEASE SAVE ME 🥺🆘</div>
+        <button id="start-game-btn">START THE GAME</button>
+    </div>
+
+    <div id="scoreBoard">Score: 0</div>
+    <canvas id="gameCanvas"></canvas>
+
+    <div id="win-overlay">
+        <div class="win-title">CONGRATULATIONS!</div>
+        <div class="win-message">YOU WON! You saved the dev! 🎉🥳</div>
+    </div>
+    <a id="next-page-btn" href="page8.html">NEXT</a>
+
+    <script>
+        const IMAGE_SOURCES = {
+            background: 'bg7.jpg',
+            bird: 'bird.png', 
+            obstacles: ['person_0.png', 'person_1.png', 'person_2.png', 'person_3.png', 'person_4.png']
+        };
+
+        const SOUNDS = {
+            bg: document.getElementById('snd-bg'), start: document.getElementById('snd-start'),
+            jump: document.getElementById('snd-jump'), hit: document.getElementById('snd-hit'), gameover: document.getElementById('snd-gameover')
+        };
+
+        const images = { obstacles: [] };
+        function safeLoadImage(src) {
+            const img = new Image();
+            img.src = src;
+            return img;
+        }
+
+        images.background = safeLoadImage(IMAGE_SOURCES.background);
+        images.bird = safeLoadImage(IMAGE_SOURCES.bird);
+        IMAGE_SOURCES.obstacles.forEach((src, i) => {
+            images.obstacles[i] = safeLoadImage(src);
+        });
+
+        const rulesScreen = document.getElementById('rules-screen');
+        const startBtn = document.getElementById('start-game-btn');
+        const winOverlay = document.getElementById('win-overlay');
+        const scoreBoard = document.getElementById('scoreBoard');
+        const nextBtn = document.getElementById('next-page-btn');
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let gameState = 'ready'; 
+        let score = 0;
+        let bgX = 0; 
+
+        startBtn.addEventListener('click', () => {
+            if (gameState !== 'ready') return;
+            gameState = 'playing';
+            SOUNDS.start.play().catch(() => {});
+            rulesScreen.style.opacity = '0';
+            setTimeout(() => {
+                rulesScreen.style.display = 'none';
+                canvas.style.display = 'block';
+                scoreBoard.style.display = 'block';
+                initializeGame();
+                SOUNDS.bg.play().catch(() => {});
+            }, 500);
+        });
+
+        function winGame() {
+            gameState = 'won'; SOUNDS.bg.pause();
+            scoreBoard.style.display = 'none'; winOverlay.style.display = 'flex';
+            setTimeout(() => { nextBtn.style.bottom = '30px'; }, 2000);
+        }
+
+        function gameOver() {
+            gameState = 'over'; SOUNDS.bg.pause();
+            SOUNDS.hit.play().catch(() => {});
+            setTimeout(() => { SOUNDS.gameover.play().catch(() => {}); }, 300);
+            setTimeout(() => {
+                alert(`Game Over! Final Score: ${score}. Tap OK to retry.`);
+                restartGame();
+            }, 1000);
+        }
+
+        function restartGame() {
+            gameState = 'ready'; score = 0; bgX = 0;
+            scoreBoard.innerText = 'Score: 0';
+            scoreBoard.style.display = 'none'; winOverlay.style.display = 'none';
+            nextBtn.style.bottom = '-100px'; canvas.style.display = 'none';
+            rulesScreen.style.display = 'flex'; rulesScreen.style.opacity = '1';
+        }
+
+        const GAME_CONFIG = { 
+            gravity: 0.45,         
+            jumpForce: -8.5,       
+            pipeSpeed: 3,          
+            bgSpeed: 1,            
+            pipeGap: 260,          
+            pipeSpawnRate: 110,    
+            birdX: 100, 
+            birdSize: 65,          
+            pipeWidth: 80
+        };
+
+        function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resizeCanvas); resizeCanvas();
+
+        let bird, pipes, frames;
+
+        function initializeGame() {
+            bird = { y: canvas.height / 2, velocity: 0, size: GAME_CONFIG.birdSize };
+            pipes = []; frames = 0; bgX = 0;
+            requestAnimationFrame(gameLoop);
+        }
+
+        function gameLoop() {
+            if (gameState !== 'playing') return;
+            frames++; update(); draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function update() {
+            bgX -= GAME_CONFIG.bgSpeed;
+            if (bgX <= -canvas.width) bgX = 0;
+            bird.velocity += GAME_CONFIG.gravity; 
+            bird.y += bird.velocity;
+
+            const handleJump = (e) => {
+                if (gameState === 'playing') {
+                    if (e.type === 'touchstart') e.preventDefault();
+                    bird.velocity = GAME_CONFIG.jumpForce;
+                    SOUNDS.jump.currentTime = 0; SOUNDS.jump.play().catch(() => {});
+                }
+            };
+            if (frames === 1) {
+                window.addEventListener('mousedown', handleJump);
+                window.addEventListener('touchstart', handleJump, {passive: false});
+            }
+
+            if (bird.y + bird.size / 2 >= canvas.height || bird.y - bird.size / 2 <= 0) { 
+                gameOver(); return; 
+            }
+
+            if (frames % GAME_CONFIG.pipeSpawnRate === 0) {
+                const pipeHeight = Math.random() * (canvas.height - GAME_CONFIG.pipeGap - 160) + 80;
+                const randomPersonImage = images.obstacles[Math.floor(Math.random() * images.obstacles.length)];
+                pipes.push({ x: canvas.width, y: pipeHeight, width: GAME_CONFIG.pipeWidth, passed: false, photo: randomPersonImage });
+            }
+
+            for (let i = pipes.length - 1; i >= 0; i--) {
+                pipes[i].x -= GAME_CONFIG.pipeSpeed;
+                const pipe = pipes[i];
+                const birdLeft = GAME_CONFIG.birdX;
+                const birdRight = GAME_CONFIG.birdX + bird.size;
+                const birdTop = bird.y - bird.size / 2;
+                const birdBottom = bird.y + bird.size / 2;
+
+                if (birdRight > pipe.x && birdLeft < pipe.x + pipe.width) {
+                    if (birdTop < pipe.y || birdBottom > pipe.y + GAME_CONFIG.pipeGap) {
+                        gameOver(); return;
+                    }
+                }
+
+                if (!pipe.passed && birdLeft > pipe.x + pipe.width) {
+                    score++; 
+                    pipe.passed = true;
+                    scoreBoard.innerText = 'Score: ' + score;
+                    // UPDATED WIN SCORE TO 20
+                    if (score >= 20) { winGame(); return; }
+                }
+
+                if (pipe.x + pipe.width < 0) { pipes.splice(i, 1); }
+            }
+        }
+
+        function draw() {
+            if (images.background && images.background.complete && images.background.naturalWidth > 0) {
+                ctx.drawImage(images.background, bgX, 0, canvas.width, canvas.height);
+                ctx.drawImage(images.background, bgX + canvas.width, 0, canvas.width, canvas.height);
+            } else {
+                ctx.fillStyle = '#222'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+
+            pipes.forEach(pipe => {
+                const faceSize = pipe.width;
+                const lowerPipeTop = pipe.y + GAME_CONFIG.pipeGap;
+                ctx.fillStyle = '#1b5e20';
+                ctx.fillRect(pipe.x, 0, pipe.width, pipe.y);
+                ctx.fillStyle = '#4CAF50';
+                ctx.fillRect(pipe.x + 5, 0, pipe.width - 10, pipe.y);
+                if (pipe.photo && pipe.photo.complete && pipe.photo.naturalWidth > 0) {
+                    ctx.drawImage(pipe.photo, pipe.x, pipe.y - faceSize, faceSize, faceSize);
+                }
+                ctx.fillStyle = '#1b5e20';
+                ctx.fillRect(pipe.x, lowerPipeTop, pipe.width, canvas.height - lowerPipeTop);
+                ctx.fillStyle = '#4CAF50';
+                ctx.fillRect(pipe.x + 5, lowerPipeTop, pipe.width - 10, canvas.height - lowerPipeTop);
+                if (pipe.photo && pipe.photo.complete && pipe.photo.naturalWidth > 0) {
+                    ctx.drawImage(pipe.photo, pipe.x, lowerPipeTop, faceSize, faceSize);
+                }
+            });
+
+            if (images.bird && images.bird.complete && images.bird.naturalWidth > 0) {
+                ctx.drawImage(images.bird, GAME_CONFIG.birdX, bird.y - bird.size / 2, bird.size, bird.size);
+            } else {
+                ctx.fillStyle = '#ffcc00'; ctx.fillRect(GAME_CONFIG.birdX, bird.y - bird.size / 2, bird.size, bird.size);
+            }
+        }
+    </script>
+</body>
+  </html>
