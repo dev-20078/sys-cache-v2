@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Surprise For You</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+    
+    <style>
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            overflow: hidden; background-color: #050508; 
+            font-family: 'Cinzel', serif; user-select: none;
+        }
+
+        /* --- PHASE 1 & 2 (Unchanged & Glowing) --- */
+        #surprise-screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 100; text-align: center; color: white;
+            transition: opacity 1.5s ease-out;
+        }
+
+        .surprise-text {
+            font-family: 'Dancing Script', cursive; font-size: 4rem; 
+            color: #fff; text-shadow: 0 0 10px #ff99cc, 0 0 20px #ff66b2, 0 0 40px #ff66b2;
+            margin-bottom: 50px; padding: 0 20px; letter-spacing: 2px;
+            animation: fadeInGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes fadeInGlow {
+            from { opacity: 0.8; text-shadow: 0 0 10px #ff99cc, 0 0 20px #ff66b2; }
+            to { opacity: 1; text-shadow: 0 0 20px #ff99cc, 0 0 40px #ff66b2, 0 0 60px #ff66b2; }
+        }
+
+        #click-me-btn, #next-phase-btn {
+            padding: 15px 50px; font-size: 1.5rem; font-weight: bold; font-family: inherit;
+            color: white; background: rgba(255, 255, 255, 0.05); 
+            border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 50px; cursor: pointer;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 0 20px rgba(0, 210, 255, 0.4);
+            transition: all 0.4s ease; animation: pulseBtn 2s infinite;
+        }
+        
+        @keyframes pulseBtn {
+            0% { transform: scale(1); box-shadow: 0 0 20px rgba(0, 210, 255, 0.4); }
+            50% { transform: scale(1.05); box-shadow: 0 0 40px rgba(0, 210, 255, 0.8), inset 0 0 10px rgba(0, 210, 255, 0.5); }
+            100% { transform: scale(1); box-shadow: 0 0 20px rgba(0, 210, 255, 0.4); }
+        }
+
+        #flower-canvas-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; display: none; }
+        
+        #tap-instruction {
+            position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
+            font-size: 1.2rem; color: #fff; text-shadow: 0 0 10px #00d2ff;
+            animation: pulseHint 2s infinite; pointer-events: none;
+        }
+
+        #next-phase-btn {
+            position: absolute; bottom: -100px; left: 50%; transform: translateX(-50%);
+            z-index: 50; transition: bottom 1s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        /* --- PHASE 3: 3D GARDEN UI --- */
+        #space-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; z-index: 5; }
+        
+        #ui-container {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: none; z-index: 20; pointer-events: none;
+        }
+
+        #score-board {
+            position: absolute; top: 20px; left: 20px;
+            font-size: 1.8rem; color: #fff; text-shadow: 0 0 10px #ff66b2, 0 0 20px #ff99cc;
+            background: rgba(0,0,0,0.5); padding: 10px 20px; border-radius: 15px; border: 1px solid #ff66b2;
+        }
+
+        #walk-btn {
+            position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
+            padding: 15px 40px; font-size: 1.5rem; font-family: 'Cinzel', serif; font-weight: bold;
+            color: white; background: rgba(0, 210, 255, 0.2); 
+            border: 2px solid #00d2ff; border-radius: 50px; cursor: pointer;
+            backdrop-filter: blur(5px); box-shadow: 0 0 20px #00d2ff; pointer-events: auto;
+        }
+        #walk-btn:active { background: rgba(0, 210, 255, 0.5); transform: translateX(-50%) scale(0.95); }
+
+        #crosshair {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            color: rgba(255,255,255,0.5); font-size: 1.5rem; pointer-events: none;
+        }
+
+        @keyframes pulseHint { 0%, 100% { opacity: 0.2; } 50% { opacity: 1; } }
+
+        @media (max-width: 768px) {
+            .surprise-text { font-size: 2.8rem; }
+            #click-me-btn, #next-phase-btn, #walk-btn { font-size: 1.2rem; padding: 12px 30px; }
+            #score-board { font-size: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="bg-music" src="surprise.mp3" loop></audio>
+
+    <div id="surprise-screen">
+        <div class="surprise-text">Aap ke liye ek surprise hai...</div>
+        <button id="click-me-btn">Ise Click Karo ✨</button>
+    </div>
+
+    <div id="flower-canvas-container">
+        <div id="tap-instruction">Tap on the screen to grow flowers! 🌸</div>
+        <canvas id="interactiveCanvas"></canvas>
+    </div>
+    <button id="next-phase-btn">Chalo Garden Mein Chalein 🌸</button>
+
+    <div id="space-screen"></div>
+    <div id="ui-container">
+        <div id="score-board">Picked: 0</div>
+        <div id="crosshair">+</div>
+        <button id="walk-btn">HOLD TO WALK</button>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+    <script>
+        const bgMusic = document.getElementById('bg-music');
+        const surpriseScreen = document.getElementById('surprise-screen');
+        const clickMeBtn = document.getElementById('click-me-btn');
+        const canvasContainer = document.getElementById('flower-canvas-container');
+        const nextPhaseBtn = document.getElementById('next-phase-btn');
+        const spaceScreen = document.getElementById('space-screen');
+        const uiContainer = document.getElementById('ui-container');
+        const walkBtn = document.getElementById('walk-btn');
+        const scoreBoard = document.getElementById('score-board');
+
+        // Neon Glow Palette (Pink, Peach, Blue)
+        const neonColors = [
+            { core: '#fff', glow: '#FF69B4' }, // Neon Pink
+            { core: '#fff', glow: '#FFCBA4' }, // Neon Peach
+            { core: '#fff', glow: '#00BFFF' }, // Neon Blue
+            { core: '#fff', glow: '#FF1493' }  // Deep Neon Pink
+        ];
+
+        // --- TRANSITIONS ---
+        clickMeBtn.addEventListener('click', () => {
+            bgMusic.play().catch(e => console.log(e));
+            surpriseScreen.style.opacity = '0';
+            setTimeout(() => {
+                surpriseScreen.style.display = 'none';
+                canvasContainer.style.display = 'block';
+                initInteractiveFlowers();
+                setTimeout(() => { nextPhaseBtn.style.bottom = '50px'; }, 8000);
+            }, 1500);
+        });
+
+        nextPhaseBtn.addEventListener('click', () => {
+            canvasContainer.style.opacity = '0';
+            nextPhaseBtn.style.bottom = '-100px';
+            setTimeout(() => {
+                canvasContainer.style.display = 'none';
+                spaceScreen.style.display = 'block';
+                uiContainer.style.display = 'block';
+                initInfiniteGarden();
+            }, 1000);
+        });
+
+        // ==========================================
+        // PHASE 2: GLOWING NEON 2D FLOWERS
+        // ==========================================
+        function initInteractiveFlowers() {
+            const canvas = document.getElementById('interactiveCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const flowers = [];
+
+            class NeonFlower {
+                constructor(x, y) {
+                    this.x = x; this.y = y + 250; this.targetY = y; 
+                    this.colorTheme = neonColors[Math.floor(Math.random() * neonColors.length)];
+                    this.size = 0; this.maxSize = Math.random() * 20 + 35; 
+                    this.stemHeight = 0; this.maxStemHeight = 250;
+                    this.sway = Math.random() * 100;
+                    this.petalCount = Math.floor(Math.random() * 4) + 6; // 6 to 9 petals (Mix of Lotus/Rose feel)
+                }
+
+                grow() {
+                    if (this.stemHeight < this.maxStemHeight) this.stemHeight += (this.maxStemHeight - this.stemHeight) * 0.05 + 1;
+                    if (this.stemHeight > this.maxStemHeight * 0.8 && this.size < this.maxSize) {
+                        this.size += (this.maxSize - this.size) * 0.05 + 0.5;
+                    }
+                    this.sway += 0.015;
+                }
+
+                draw() {
+                    const swayOffset = Math.sin(this.sway) * 30;
+                    const currentX = this.x + swayOffset;
+                    const currentY = this.y + this.maxStemHeight - this.stemHeight;
+                    
+                    ctx.beginPath(); ctx.moveTo(this.x, this.y + this.maxStemHeight);
+                    ctx.quadraticCurveTo(this.x + swayOffset/2, this.y + this.maxStemHeight/2, currentX, currentY);
+                    ctx.lineWidth = 4; ctx.strokeStyle = '#0f380f'; ctx.shadowColor = '#4CAF50'; ctx.shadowBlur = 15;
+                    ctx.stroke(); ctx.shadowBlur = 0; 
+
+                    if (this.size > 2) {
+                        ctx.save(); ctx.translate(currentX, currentY);
+                        for (let i = 0; i < this.petalCount; i++) {
+                            ctx.rotate((Math.PI * 2) / this.petalCount);
+                            ctx.beginPath(); ctx.moveTo(0, 0);
+                            ctx.bezierCurveTo(this.size / 2, -this.size / 2, this.size, -this.size / 4, this.size, 0);
+                            ctx.bezierCurveTo(this.size, this.size / 4, this.size / 2, this.size / 2, 0, 0);
+                            
+                            const grad = ctx.createRadialGradient(0, 0, 0, this.size/2, 0, this.size);
+                            grad.addColorStop(0, this.colorTheme.core);
+                            grad.addColorStop(0.4, this.colorTheme.glow);
+                            grad.addColorStop(1, 'rgba(0,0,0,0)');
+                            
+                            ctx.fillStyle = grad; ctx.shadowColor = this.colorTheme.glow; ctx.shadowBlur = 25;
+                            ctx.fill();
+                        }
+                        ctx.beginPath(); ctx.arc(0, 0, this.size * 0.15, 0, Math.PI * 2);
+                        ctx.fillStyle = '#fff'; ctx.shadowColor = '#FFD700'; ctx.shadowBlur = 20; ctx.fill();
+                        ctx.restore();
+                    }
+                }
+            }
+
+            for(let i=0; i<5; i++) {
+                setTimeout(() => { flowers.push(new NeonFlower(Math.random() * (canvas.width - 100) + 50, canvas.height/2 + Math.random() * 150 - 50)); }, i * 600);
+            }
+
+            window.addEventListener('click', (e) => { if(canvasContainer.style.display === 'block') flowers.push(new NeonFlower(e.clientX, e.clientY - 150)); });
+            window.addEventListener('touchstart', (e) => { if(canvasContainer.style.display === 'block') flowers.push(new NeonFlower(e.touches[0].clientX, e.touches[0].clientY - 150)); });
+
+            function animate2D() {
+                if(canvasContainer.style.display === 'none') return;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                flowers.forEach(f => { f.grow(); f.draw(); });
+                requestAnimationFrame(animate2D);
+            }
+            animate2D();
+        }
+
+        // ==========================================
+        // PHASE 3: 3D WALKING GARDEN & FLOWER PICKING
+        // ==========================================
+        function initInfiniteGarden() {
+            const scene = new THREE.Scene();
+            scene.fog = new THREE.FogExp2(0x020205, 0.003); // Dense fog hides the edges, creates infinite illusion
+            scene.background = new THREE.Color(0x020205);
+
+            const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 15, 0); // Eye level
+
+            const renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            spaceScreen.appendChild(renderer.domElement);
+
+            // Controls for looking around (Swipe to look)
+            const controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.enableZoom = false; 
+            controls.enablePan = false;
+            // Lock vertical angle so user doesn't look under the ground
+            controls.maxPolarAngle = Math.PI / 2 + 0.1; 
+            controls.minPolarAngle = Math.PI / 4;
+            controls.target.set(0, 15, -1); // Look forward initially
+
+            // Ground
+            const groundGeo = new THREE.PlaneGeometry(2000, 2000);
+            const groundMat = new THREE.MeshBasicMaterial({ color: 0x011a01, side: THREE.DoubleSide });
+            const ground = new THREE.Mesh(groundGeo, groundMat);
+            ground.rotation.x = -Math.PI / 2;
+            scene.add(ground);
+
+            // --- INSTANCED MESH FOR 100,000 FLOWERS (Gaming Performance) ---
+            const FLOWER_COUNT = 50000; // Optimal balance of infinite look + smooth gameplay
+            const geometry = new THREE.PlaneGeometry(12, 12);
+            geometry.translate(0, 6, 0); // Anchor to ground so only top sways in wind
+
+            // Create Premium Neon Texture for 3D
+            function createTexture(colorTheme) {
+                const canvas = document.createElement('canvas');
+                canvas.width = 128; canvas.height = 128;
+                const ctx = canvas.getContext('2d');
+                ctx.translate(64, 64);
+                
+                // Draw Petals
+                for (let i = 0; i < 8; i++) {
+                    ctx.rotate((Math.PI * 2) / 8);
+                    ctx.beginPath(); ctx.moveTo(0, 0);
+                    ctx.bezierCurveTo(40, -20, 60, -10, 60, 0);
+                    ctx.bezierCurveTo(60, 10, 40, 20, 0, 0);
+                    const grad = ctx.createRadialGradient(0, 0, 0, 30, 0, 60);
+                    grad.addColorStop(0, colorTheme.core); grad.addColorStop(0.5, colorTheme.glow); grad.addColorStop(1, 'rgba(0,0,0,0)');
+                    ctx.fillStyle = grad; ctx.shadowColor = colorTheme.glow; ctx.shadowBlur = 15; ctx.fill();
+                }
+                // Center
+                ctx.beginPath(); ctx.arc(0, 0, 8, 0, Math.PI * 2); ctx.fillStyle = '#fff'; ctx.shadowBlur = 10; ctx.fill();
+                
+                // Stem
+                ctx.fillStyle = '#0f380f'; ctx.fillRect(-2, 0, 4, 64);
+                return new THREE.CanvasTexture(canvas);
+            }
+
+            const textures = neonColors.map(c => createTexture(c));
+            
+            // Custom Shader Material for WIND EFFECT
+            const material = new THREE.MeshBasicMaterial({ 
+                map: textures[0], transparent: true, alphaTest: 0.1, side: THREE.DoubleSide 
+            });
+
+            // Inject Wind Physics into Shader
+            material.onBeforeCompile = (shader) => {
+                shader.uniforms.time = { value: 0 };
+                material.userData.shader = shader;
+                shader.vertexShader = `
+                  uniform float time;
+                  ${shader.vertexShader}
+                `.replace(
+                  `#include <begin_vertex>`,
+                  `
+                  #include <begin_vertex>
+                  // Sway calculated based on position in world and height (y)
+                  float wind = sin(time * 2.0 + instanceMatrix[3][0] * 0.05 + instanceMatrix[3][2] * 0.05) * 2.0;
+                  transformed.x += wind * (position.y / 12.0); // Only top moves
+                  `
+                );
+            };
+
+            const instancedMesh = new THREE.InstancedMesh(geometry, material, FLOWER_COUNT);
+            const dummy = new THREE.Object3D();
+            
+            // Plant flowers in ROWS
+            let i = 0;
+            const rows = 250;
+            const cols = 200;
+            const spacing = 10; // Distance between rows
+
+            for(let r=0; r<rows; r++) {
+                for(let c=0; c<cols; c++) {
+                    if (i >= FLOWER_COUNT) break;
+                    
+                    // Create rows but with slight organic offset
+                    const x = (c - cols/2) * spacing + (Math.random() * 4 - 2);
+                    const z = (r - rows/2) * spacing + (Math.random() * 4 - 2);
+                    
+                    // Don't spawn exactly where camera starts
+                    if (Math.abs(x) < 5 && Math.abs(z) < 5) continue;
+
+                    dummy.position.set(x, 0, z);
+                    
+                    // Make them face camera roughly
+                    dummy.rotation.y = Math.random() * Math.PI;
+                    
+                    // Random size
+                    const scale = Math.random() * 0.8 + 0.6;
+                    dummy.scale.set(scale, scale, scale);
+                    
+                    dummy.updateMatrix();
+                    instancedMesh.setMatrixAt(i, dummy.matrix);
+
+                    // Assign random neon color texture (handled via instance color trick, but for simplicity we rely on one material and random rotations to look diverse. To keep it hyper performant on phones, we use 1 material).
+                    i++;
+                }
+            }
+            scene.add(instancedMesh);
+
+            // --- WALKING MECHANICS ---
+            let isWalking = false;
+            const walkSpeed = 1.5;
+            const direction = new THREE.Vector3();
+
+            walkBtn.addEventListener('mousedown', () => isWalking = true);
+            walkBtn.addEventListener('mouseup', () => isWalking = false);
+            walkBtn.addEventListener('mouseleave', () => isWalking = false);
+            walkBtn.addEventListener('touchstart', (e) => { e.preventDefault(); isWalking = true; }, {passive:false});
+            walkBtn.addEventListener('touchend', () => isWalking = false);
+
+            // --- PICKING SYSTEM ---
+            const raycaster = new THREE.Raycaster();
+            const mouse = new THREE.Vector2();
+            let pickedCount = 0;
+
+            function pickFlower(event) {
+                // Determine touch or click coordinates
+                let clientX = event.clientX;
+                let clientY = event.clientY;
+                if(event.changedTouches) {
+                    clientX = event.changedTouches[0].clientX;
+                    clientY = event.changedTouches[0].clientY;
+                }
+
+                // Check if user clicked the walk button (don't pick flower if walking)
+                if (event.target === walkBtn) return;
+
+                mouse.x = (clientX / window.innerWidth) * 2 - 1;
+                mouse.y = -(clientY / window.innerHeight) * 2 + 1;
+
+                raycaster.setFromCamera(mouse, camera);
+                const intersects = raycaster.intersectObject(instancedMesh);
+
+                if (intersects.length > 0) {
+                    const instanceId = intersects[0].instanceId;
+                    
+                    // "Pick" it by shrinking it to 0
+                    instancedMesh.getMatrixAt(instanceId, dummy.matrix);
+                    dummy.matrix.decompose(dummy.position, dummy.rotation, dummy.scale);
+                    
+                    // Only count if it's not already picked
+                    if (dummy.scale.x > 0) {
+                        dummy.scale.set(0, 0, 0);
+                        dummy.updateMatrix();
+                        instancedMesh.setMatrixAt(instanceId, dummy.matrix);
+                        instancedMesh.instanceMatrix.needsUpdate = true;
+                        
+                        pickedCount++;
+                        scoreBoard.innerText = `Picked: ${pickedCount}`;
+                        
+                        // Small screen flash feedback
+                        scoreBoard.style.transform = "scale(1.2)";
+                        setTimeout(() => scoreBoard.style.transform = "scale(1)", 150);
+                    }
+                }
+            }
+
+            window.addEventListener('click', pickFlower);
+            window.addEventListener('touchstart', (e) => { if(e.target !== walkBtn) pickFlower(e); }, {passive: false});
+
+            // --- RENDER LOOP ---
+            const clock = new THREE.Clock();
+
+            function animate3D() {
+                requestAnimationFrame(animate3D);
+                
+                const time = clock.getElapsedTime();
+                
+                // Update Wind Physics
+                if (material.userData.shader) {
+                    material.userData.shader.uniforms.time.value = time;
+                }
+
+                // Handle Walking
+                if (isWalking) {
+                    // Get forward direction
+                    camera.getWorldDirection(direction);
+                    direction.y = 0; // Don't fly into the air
+                    direction.normalize();
+                    
+                    // Move camera
+                    camera.position.addScaledVector(direction, walkSpeed);
+                    
+                    // Move OrbitControls target so panning doesn't break
+                    controls.target.addScaledVector(direction, walkSpeed);
+                }
+
+                controls.update();
+                renderer.render(scene, camera);
+            }
+            animate3D();
+
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        }
+    </script>
+</body>
+  </html>
