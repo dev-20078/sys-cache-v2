@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Surprise For You</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+    
+    <style>
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            overflow: hidden; background-color: #050508; /* Deep dark aesthetic */
+            font-family: 'Cinzel', serif; user-select: none;
+        }
+
+        /* --- PHASE 1: SURPRISE TEXT SCREEN --- */
+        #surprise-screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 100; text-align: center; color: white;
+            transition: opacity 1.5s ease-out;
+        }
+
+        .surprise-text {
+            font-family: 'Dancing Script', cursive; font-size: 4rem; 
+            color: #fff; text-shadow: 0 0 10px #ff99cc, 0 0 20px #ff66b2, 0 0 40px #ff66b2;
+            margin-bottom: 50px; padding: 0 20px; letter-spacing: 2px;
+            animation: fadeInGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes fadeInGlow {
+            from { opacity: 0.8; text-shadow: 0 0 10px #ff99cc, 0 0 20px #ff66b2; }
+            to { opacity: 1; text-shadow: 0 0 20px #ff99cc, 0 0 40px #ff66b2, 0 0 60px #ff66b2; }
+        }
+
+        #click-me-btn {
+            padding: 15px 50px; font-size: 1.5rem; font-weight: bold; font-family: inherit;
+            color: white; background: rgba(255, 255, 255, 0.05); 
+            border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 50px; cursor: pointer;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 0 20px rgba(0, 210, 255, 0.4);
+            transition: all 0.4s ease; animation: pulseBtn 2s infinite;
+        }
+        
+        @keyframes pulseBtn {
+            0% { transform: scale(1); box-shadow: 0 0 20px rgba(0, 210, 255, 0.4); }
+            50% { transform: scale(1.05); box-shadow: 0 0 40px rgba(0, 210, 255, 0.8), inset 0 0 10px rgba(0, 210, 255, 0.5); }
+            100% { transform: scale(1); box-shadow: 0 0 20px rgba(0, 210, 255, 0.4); }
+        }
+
+        /* --- PHASE 2: 2D INTERACTIVE FLOWERS --- */
+        #flower-canvas-container {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 10; display: none;
+        }
+
+        #next-phase-btn {
+            position: absolute; bottom: -100px; left: 50%; transform: translateX(-50%);
+            padding: 15px 40px; font-size: 1.5rem; font-weight: bold; font-family: 'Cinzel', serif;
+            color: white; background: rgba(255, 255, 255, 0.1); 
+            border: 1px solid rgba(255, 102, 178, 0.5); border-radius: 50px; cursor: pointer;
+            backdrop-filter: blur(10px); box-shadow: 0 0 30px rgba(255, 102, 178, 0.6);
+            z-index: 50; transition: bottom 1s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        /* --- PHASE 3: INFINITE 3D SPACE --- */
+        #space-screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: none; z-index: 5;
+        }
+
+        #hint-text {
+            position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
+            font-size: 1.2rem; color: rgba(255,255,255,0.8); letter-spacing: 4px;
+            z-index: 20; display: none; animation: pulseHint 2.5s infinite; pointer-events: none;
+            text-shadow: 0 0 10px rgba(255,255,255,0.5);
+        }
+
+        @keyframes pulseHint { 0%, 100% { opacity: 0.2; } 50% { opacity: 1; } }
+
+        @media (max-width: 768px) {
+            .surprise-text { font-size: 2.8rem; }
+            #click-me-btn, #next-phase-btn { font-size: 1.2rem; padding: 12px 30px; }
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="bg-music" src="surprise.mp3" loop></audio>
+
+    <div id="surprise-screen">
+        <div class="surprise-text">Aap ke liye ek surprise hai...</div>
+        <button id="click-me-btn">Ise Click Karo ✨</button>
+    </div>
+
+    <div id="flower-canvas-container">
+        <canvas id="interactiveCanvas"></canvas>
+    </div>
+    <button id="next-phase-btn">Aap Ke Liye Kuch Phool 🌸</button>
+
+    <div id="space-screen"></div>
+    <div id="hint-text">EXPLORE THE UNIVERSE</div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+    <script>
+        const bgMusic = document.getElementById('bg-music');
+        const surpriseScreen = document.getElementById('surprise-screen');
+        const clickMeBtn = document.getElementById('click-me-btn');
+        const canvasContainer = document.getElementById('flower-canvas-container');
+        const nextPhaseBtn = document.getElementById('next-phase-btn');
+        const spaceScreen = document.getElementById('space-screen');
+        const hintText = document.getElementById('hint-text');
+
+        // Premium Color Palette (Glowing Peach, Blue, Pink)
+        const flowerColors = [
+            { core: '#fff', glow: '#FFCBA4' }, // Peach
+            { core: '#fff', glow: '#FF69B4' }, // Hot Pink
+            { core: '#fff', glow: '#00BFFF' }, // Deep Sky Blue
+            { core: '#fff', glow: '#FF99CC' }, // Soft Pink
+            { core: '#fff', glow: '#87CEEB' }  // Light Blue
+        ];
+
+        // --- TRANSITIONS ---
+        clickMeBtn.addEventListener('click', () => {
+            bgMusic.play().catch(e => console.log(e));
+            surpriseScreen.style.opacity = '0';
+            setTimeout(() => {
+                surpriseScreen.style.display = 'none';
+                canvasContainer.style.display = 'block';
+                initInteractiveFlowers();
+                setTimeout(() => { nextPhaseBtn.style.bottom = '50px'; }, 8000);
+            }, 1500);
+        });
+
+        nextPhaseBtn.addEventListener('click', () => {
+            canvasContainer.style.opacity = '0';
+            nextPhaseBtn.style.bottom = '-100px';
+            setTimeout(() => {
+                canvasContainer.style.display = 'none';
+                spaceScreen.style.display = 'block';
+                hintText.style.display = 'block';
+                initInfiniteSpace();
+            }, 1000);
+        });
+
+        // ==========================================
+        // PHASE 2: ADVANCED 2D GLOWING FLOWERS
+        // ==========================================
+        function initInteractiveFlowers() {
+            const canvas = document.getElementById('interactiveCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const flowers = [];
+
+            class AdvancedFlower {
+                constructor(x, y) {
+                    this.x = x;
+                    this.y = y + 250; 
+                    this.targetY = y; 
+                    this.colorTheme = flowerColors[Math.floor(Math.random() * flowerColors.length)];
+                    this.size = 0;
+                    this.maxSize = Math.random() * 20 + 35; // Bigger, elegant flowers
+                    this.stemHeight = 0;
+                    this.maxStemHeight = 250;
+                    this.sway = Math.random() * 100;
+                    this.petalCount = Math.floor(Math.random() * 3) + 6; // 6 to 8 petals
+                }
+
+                grow() {
+                    // Smooth easing for growth
+                    if (this.stemHeight < this.maxStemHeight) this.stemHeight += (this.maxStemHeight - this.stemHeight) * 0.05 + 1;
+                    if (this.stemHeight > this.maxStemHeight * 0.8 && this.size < this.maxSize) {
+                        this.size += (this.maxSize - this.size) * 0.05 + 0.5;
+                    }
+                    this.sway += 0.015;
+                }
+
+                draw() {
+                    const swayOffset = Math.sin(this.sway) * 30;
+                    const currentX = this.x + swayOffset;
+                    const currentY = this.y + this.maxStemHeight - this.stemHeight;
+                    
+                    // Draw Elegant Stem
+                    ctx.beginPath();
+                    ctx.moveTo(this.x, this.y + this.maxStemHeight);
+                    ctx.quadraticCurveTo(this.x + swayOffset/2, this.y + this.maxStemHeight/2, currentX, currentY);
+                    ctx.lineWidth = 3;
+                    ctx.strokeStyle = 'rgba(100, 200, 100, 0.6)';
+                    ctx.shadowColor = 'rgba(100, 200, 100, 0.8)';
+                    ctx.shadowBlur = 10;
+                    ctx.stroke();
+                    ctx.shadowBlur = 0; // Reset
+
+                    // Draw Glowing Petals
+                    if (this.size > 2) {
+                        ctx.save();
+                        ctx.translate(currentX, currentY);
+                        
+                        for (let i = 0; i < this.petalCount; i++) {
+                            ctx.rotate((Math.PI * 2) / this.petalCount);
+                            
+                            ctx.beginPath();
+                            ctx.moveTo(0, 0);
+                            // Real petal bezier curves
+                            ctx.bezierCurveTo(this.size / 2, -this.size / 3, this.size, -this.size / 8, this.size, 0);
+                            ctx.bezierCurveTo(this.size, this.size / 8, this.size / 2, this.size / 3, 0, 0);
+                            
+                            // Glowing Gradient
+                            const grad = ctx.createRadialGradient(0, 0, 0, this.size/2, 0, this.size);
+                            grad.addColorStop(0, this.colorTheme.core);
+                            grad.addColorStop(0.3, this.colorTheme.glow);
+                            grad.addColorStop(1, 'rgba(0,0,0,0)');
+                            
+                            ctx.fillStyle = grad;
+                            ctx.shadowColor = this.colorTheme.glow;
+                            ctx.shadowBlur = 20;
+                            ctx.fill();
+                        }
+                        
+                        // Glowing Center
+                        ctx.beginPath();
+                        ctx.arc(0, 0, this.size * 0.15, 0, Math.PI * 2);
+                        ctx.fillStyle = '#FFFDE7';
+                        ctx.shadowColor = '#FFD700';
+                        ctx.shadowBlur = 15;
+                        ctx.fill();
+                        
+                        ctx.restore();
+                    }
+                }
+            }
+
+            // Spawn initial flowers beautifully
+            for(let i=0; i<7; i++) {
+                setTimeout(() => {
+                    flowers.push(new AdvancedFlower(Math.random() * (canvas.width - 100) + 50, canvas.height/2 + Math.random() * 150 - 50));
+                }, i * 600);
+            }
+
+            // Tap to grow
+            window.addEventListener('click', (e) => {
+                if(canvasContainer.style.display === 'block') flowers.push(new AdvancedFlower(e.clientX, e.clientY - 150));
+            });
+            window.addEventListener('touchstart', (e) => {
+                if(canvasContainer.style.display === 'block') flowers.push(new AdvancedFlower(e.touches[0].clientX, e.touches[0].clientY - 150));
+            });
+
+            function animate2D() {
+                if(canvasContainer.style.display === 'none') return;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                flowers.forEach(f => { f.grow(); f.draw(); });
+                requestAnimationFrame(animate2D);
+            }
+            animate2D();
+        }
+
+        // ==========================================
+        // PHASE 3: INFINITE 3D PREMIUM SPACE
+        // ==========================================
+        function initInfiniteSpace() {
+            const scene = new THREE.Scene();
+            scene.fog = new THREE.FogExp2(0x050508, 0.0007); 
+
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 4000);
+            camera.position.z = 400;
+
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            spaceScreen.appendChild(renderer.domElement);
+
+            const controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.03;
+            controls.autoRotate = true; 
+            controls.autoRotateSpeed = 0.8;
+
+            // Generate High-Quality Petal Textures for 3D
+            function createPremiumTexture(theme) {
+                const canvas = document.createElement('canvas');
+                canvas.width = 256; canvas.height = 256;
+                const ctx = canvas.getContext('2d');
+                
+                const cx = 128, cy = 128;
+                const size = 90;
+
+                ctx.translate(cx, cy);
+                for (let i = 0; i < 7; i++) {
+                    ctx.rotate((Math.PI * 2) / 7);
+                    ctx.beginPath();
+                    ctx.moveTo(0, 0);
+                    ctx.bezierCurveTo(size / 2, -size / 3, size, -size / 8, size, 0);
+                    ctx.bezierCurveTo(size, size / 8, size / 2, size / 3, 0, 0);
+                    
+                    const grad = ctx.createRadialGradient(0, 0, 0, size/2, 0, size);
+                    grad.addColorStop(0, theme.core);
+                    grad.addColorStop(0.5, theme.glow);
+                    grad.addColorStop(1, 'rgba(0,0,0,0)');
+                    
+                    ctx.fillStyle = grad;
+                    ctx.shadowColor = theme.glow;
+                    ctx.shadowBlur = 30;
+                    ctx.fill();
+                }
+                
+                ctx.beginPath();
+                ctx.arc(0, 0, size * 0.15, 0, Math.PI * 2);
+                ctx.fillStyle = '#fff';
+                ctx.shadowColor = '#FFD700';
+                ctx.shadowBlur = 20;
+                ctx.fill();
+
+                return new THREE.CanvasTexture(canvas);
+            }
+
+            const materials = flowerColors.map(theme => {
+                const texture = createPremiumTexture(theme);
+                return new THREE.SpriteMaterial({ map: texture, color: 0xffffff, transparent: true, blending: THREE.AdditiveBlending });
+            });
+
+            const flowerGroup = new THREE.Group();
+            
+            for (let i = 0; i < 2500; i++) { 
+                const sprite = new THREE.Sprite(materials[Math.floor(Math.random() * materials.length)]);
+                sprite.position.set(
+                    THREE.MathUtils.randFloatSpread(3500), 
+                    THREE.MathUtils.randFloatSpread(3500), 
+                    THREE.MathUtils.randFloatSpread(3500)
+                );
+                const scale = THREE.MathUtils.randFloat(20, 60);
+                sprite.scale.set(scale, scale, 1);
+                flowerGroup.add(sprite);
+            }
+            scene.add(flowerGroup);
+
+            // Subtle magical dust particles
+            const dustGeo = new THREE.BufferGeometry();
+            const dustMat = new THREE.PointsMaterial({ color: 0xffffff, size: 2, transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending });
+            const dustVerts = [];
+            for(let i=0; i<3000; i++) {
+                dustVerts.push(THREE.MathUtils.randFloatSpread(3000), THREE.MathUtils.randFloatSpread(3000), THREE.MathUtils.randFloatSpread(3000));
+            }
+            dustGeo.setAttribute('position', new THREE.Float32BufferAttribute(dustVerts, 3));
+            scene.add(new THREE.Points(dustGeo, dustMat));
+
+            function animate3D() {
+                requestAnimationFrame(animate3D);
+                controls.update();
+                flowerGroup.rotation.y += 0.0005;
+                flowerGroup.rotation.x += 0.0002;
+                renderer.render(scene, camera);
+            }
+            animate3D();
+
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        }
+    </script>
+</body>
+  </html>
