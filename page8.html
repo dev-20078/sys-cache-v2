@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Surprise For You</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+    
+    <style>
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            overflow: hidden; background-color: #020205; 
+            font-family: 'Cinzel', serif; user-select: none;
+        }
+
+        /* --- PHASE 1 --- */
+        #surprise-screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 100; text-align: center; color: white;
+            transition: opacity 1s ease-out;
+        }
+
+        .surprise-text {
+            font-family: 'Dancing Script', cursive; font-size: 5rem; 
+            color: #fff; 
+            /* REAL NEON PINK GLOW ADDED */
+            text-shadow: 
+                0 0 10px #ff99cc, 
+                0 0 20px #ff66b2, 
+                0 0 40px #ff1493, 
+                0 0 80px #ff1493;
+            margin-bottom: 50px; padding: 0 20px; letter-spacing: 2px;
+            animation: fadeInGlow 1.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes fadeInGlow {
+            from { opacity: 0.8; text-shadow: 0 0 10px #ff99cc, 0 0 20px #ff66b2; }
+            to { opacity: 1; text-shadow: 0 0 20px #ff99cc, 0 0 40px #ff1493, 0 0 80px #ff1493, 0 0 120px #ff1493; }
+        }
+
+        #click-me-btn {
+            padding: 15px 50px; font-size: 1.5rem; font-weight: bold; font-family: inherit;
+            color: #fff; background: transparent; 
+            border: 2px solid #00d2ff; border-radius: 50px; cursor: pointer;
+            box-shadow: 0 0 15px #00d2ff, inset 0 0 15px #00d2ff;
+            text-shadow: 0 0 10px #00d2ff;
+            transition: all 0.3s ease; animation: pulseBtn 2s infinite;
+        }
+        
+        @keyframes pulseBtn {
+            0% { transform: scale(1); box-shadow: 0 0 15px #00d2ff, inset 0 0 15px #00d2ff; }
+            50% { transform: scale(1.05); box-shadow: 0 0 30px #00d2ff, inset 0 0 30px #00d2ff; }
+            100% { transform: scale(1); box-shadow: 0 0 15px #00d2ff, inset 0 0 15px #00d2ff; }
+        }
+
+        /* --- PHASE 2: CLEAN TEXT SCREEN --- */
+        #flower-text-screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 10; text-align: center;
+        }
+
+        .flower-message {
+            font-family: 'Dancing Script', cursive; font-size: 3.5rem; 
+            color: #fff; cursor: pointer;
+            /* PHASE 1 STYLE PINK NEON GLOW */
+            text-shadow: 0 0 15px #ff66b2, 0 0 30px #ff1493, 0 0 50px #ff007f;
+            animation: pulseHint 1.5s infinite;
+        }
+
+        /* --- PHASE 3 --- */
+        #space-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; z-index: 5; background: #010103; }
+        #ui-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; z-index: 20; pointer-events: none; }
+
+        #score-board {
+            position: absolute; top: 20px; left: 20px;
+            font-size: 1.8rem; color: #fff; text-shadow: 0 0 15px #00d2ff, 0 0 30px #00d2ff;
+            background: rgba(0,0,0,0.7); padding: 10px 20px; border-radius: 15px; border: 2px solid #00d2ff;
+        }
+
+        #walk-btn {
+            position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); pointer-events: auto;
+        }
+        #walk-btn:active { background: rgba(0, 210, 255, 0.3); transform: translateX(-50%) scale(0.95); }
+
+        #crosshair { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: rgba(255,255,255,0.7); font-size: 2rem; text-shadow: 0 0 10px #fff; pointer-events: none; }
+
+        /* FINAL BLUE GLOWING BUTTON */
+        #final-page-btn {
+            position: absolute; bottom: 40px; left: -300px; /* Hidden initially */
+            padding: 15px 40px; font-size: 1.5rem; font-family: 'Cinzel', serif; font-weight: bold;
+            color: #fff; background: transparent; 
+            border: 2px solid #00d2ff; border-radius: 50px; text-decoration: none;
+            box-shadow: 0 0 20px #00d2ff, inset 0 0 20px #00d2ff;
+            text-shadow: 0 0 10px #00d2ff;
+            z-index: 210; transition: left 1s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            pointer-events: auto;
+        }
+
+        @keyframes pulseHint { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+
+        @media (max-width: 768px) {
+            .surprise-text { font-size: 3rem; }
+            .flower-message { font-size: 2.2rem; }
+            .neon-btn, #final-page-btn { font-size: 1.1rem; padding: 12px 30px; }
+            #score-board { font-size: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="bg-music" src="surprise.mp3" loop preload="auto"></audio>
+
+    <div id="surprise-screen">
+        <div class="surprise-text">Aap ke liye ek surprise hai...</div>
+        <button class="neon-btn" id="click-me-btn">Ise Click Karo ✨</button>
+    </div>
+
+    <div id="flower-text-screen">
+        <div class="flower-message">AAP KE LIYE KUCH PHOOL</div>
+    </div>
+
+    <div id="space-screen"></div>
+    <div id="ui-container">
+        <div id="score-board">Picked: 0</div>
+        <div id="crosshair">+</div>
+        <button class="neon-btn" id="walk-btn">HOLD TO WALK</button>
+        <a id="final-page-btn" href="page9.html">FINAL PAGE</a>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+    <script>
+        const bgMusic = document.getElementById('bg-music');
+        const surpriseScreen = document.getElementById('surprise-screen');
+        const clickMeBtn = document.getElementById('click-me-btn');
+        const flowerTextScreen = document.getElementById('flower-text-screen');
+        const flowerMessage = document.querySelector('.flower-message');
+        const spaceScreen = document.getElementById('space-screen');
+        const uiContainer = document.getElementById('ui-container');
+        const walkBtn = document.getElementById('walk-btn');
+        const scoreBoard = document.getElementById('score-board');
+        const finalPageBtn = document.getElementById('final-page-btn');
+
+        const neonColors = [
+            { core: '#ffb3d9', glow: '#FF1493' }, // Pink
+            { core: '#ffe6cc', glow: '#FF8C00' }, // Peach
+            { core: '#b3e6ff', glow: '#00BFFF' }  // Blue
+        ];
+
+        // --- TRANSITIONS ---
+        clickMeBtn.addEventListener('click', () => {
+            bgMusic.play().catch(e => console.log(e));
+            surpriseScreen.style.opacity = '0';
+            setTimeout(() => {
+                surpriseScreen.style.display = 'none';
+                flowerTextScreen.style.display = 'flex';
+            }, 1000);
+        });
+
+        flowerMessage.addEventListener('click', () => {
+            flowerTextScreen.style.opacity = '0';
+            setTimeout(() => {
+                flowerTextScreen.style.display = 'none';
+                spaceScreen.style.display = 'block';
+                uiContainer.style.display = 'block';
+                initInfiniteGarden();
+                
+                // Show final blue button after 10 seconds
+                setTimeout(() => {
+                    finalPageBtn.style.left = '20px';
+                }, 10000);
+            }, 1000);
+        });
+
+        // ==========================================
+        // PHASE 3: OPTIMIZED INFINITE GARDEN (NO LAG)
+        // ==========================================
+        function initInfiniteGarden() {
+            const scene = new THREE.Scene();
+            scene.fog = new THREE.FogExp2(0x010103, 0.004); // Slightly denser fog to hide reduced density
+            scene.background = new THREE.Color(0x010103);
+
+            const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 30, 0); 
+
+            const renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            spaceScreen.appendChild(renderer.domElement);
+
+            const controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true; controls.dampingFactor = 0.05;
+            controls.enableZoom = false; controls.enablePan = false;
+            controls.maxPolarAngle = Math.PI / 2 + 0.1; controls.minPolarAngle = Math.PI / 3;
+            controls.target.set(0, 30, -1); 
+
+            // Ground
+            const groundGeo = new THREE.PlaneGeometry(10000, 10000);
+            const groundMat = new THREE.MeshBasicMaterial({ color: 0x011101, side: THREE.DoubleSide });
+            const ground = new THREE.Mesh(groundGeo, groundMat);
+            ground.rotation.x = -Math.PI / 2;
+            scene.add(ground);
+
+            // Create Premium Neon Textures
+            function createTexture(colorTheme) {
+                const canvas = document.createElement('canvas');
+                canvas.width = 128; canvas.height = 128;
+                const ctx = canvas.getContext('2d');
+                ctx.translate(64, 64);
+                for (let i = 0; i < 8; i++) {
+                    ctx.rotate((Math.PI * 2) / 8);
+                    ctx.beginPath(); ctx.moveTo(0, 0);
+                    ctx.bezierCurveTo(40, -20, 60, -10, 60, 0);
+                    ctx.bezierCurveTo(60, 10, 40, 20, 0, 0);
+                    const grad = ctx.createRadialGradient(0, 0, 0, 30, 0, 60);
+                    grad.addColorStop(0, colorTheme.core); grad.addColorStop(0.5, colorTheme.glow); grad.addColorStop(1, 'rgba(0,0,0,0)');
+                    ctx.fillStyle = grad; ctx.shadowColor = colorTheme.glow; ctx.shadowBlur = 20; ctx.fill();
+                }
+                ctx.beginPath(); ctx.arc(0, 0, 8, 0, Math.PI * 2); ctx.fillStyle = '#fff'; ctx.shadowBlur = 10; ctx.fill();
+                ctx.fillStyle = '#0f8a2f'; ctx.fillRect(-2, 0, 4, 64);
+                return new THREE.CanvasTexture(canvas);
+            }
+
+            const textures = neonColors.map(c => createTexture(c));
+            
+            const material = new THREE.MeshBasicMaterial({ 
+                map: textures[0], transparent: true, alphaTest: 0.1, side: THREE.DoubleSide 
+            });
+
+            // Wind shader
+            material.onBeforeCompile = (shader) => {
+                shader.uniforms.time = { value: 0 };
+                material.userData.shader = shader;
+                shader.vertexShader = `
+                  uniform float time;
+                  ${shader.vertexShader}
+                `.replace(
+                  `#include <begin_vertex>`,
+                  `
+                  #include <begin_vertex>
+                  float wind = sin(time * 2.0 + instanceMatrix[3][0] * 0.05 + instanceMatrix[3][2] * 0.05) * 2.0;
+                  transformed.x += wind * (position.y / 12.0);
+                  `
+                );
+            };
+
+            // OPTIMIZED COUNT: 5000 flowers instead of 30,000 for zero lag
+            const FLOWER_COUNT = 5000;
+            const FIELD_SIZE = 400; // Physical size of the moving box (adjusted for density)
+            const geometry = new THREE.PlaneGeometry(15, 15);
+            geometry.translate(0, 7.5, 0); 
+            
+            const instancedMesh = new THREE.InstancedMesh(geometry, material, FLOWER_COUNT);
+            const dummy = new THREE.Object3D();
+            
+            for(let i=0; i<FLOWER_COUNT; i++) {
+                const x = Math.random() * FIELD_SIZE - FIELD_SIZE/2;
+                const z = Math.random() * FIELD_SIZE - FIELD_SIZE/2;
+                dummy.position.set(x, 0, z);
+                dummy.rotation.y = Math.random() * Math.PI;
+                // Height fixed
+                const scale = Math.random() * 0.4 + 0.4; 
+                dummy.scale.set(scale, scale, scale);
+                dummy.updateMatrix();
+                instancedMesh.setMatrixAt(i, dummy.matrix);
+            }
+            scene.add(instancedMesh);
+
+            // Walking mechanics
+            let isWalking = false;
+            const walkSpeed = 1.5;
+            const direction = new THREE.Vector3();
+
+            walkBtn.addEventListener('mousedown', () => isWalking = true);
+            walkBtn.addEventListener('mouseup', () => isWalking = false);
+            walkBtn.addEventListener('mouseleave', () => isWalking = false);
+            walkBtn.addEventListener('touchstart', (e) => { e.preventDefault(); isWalking = true; }, {passive:false});
+            walkBtn.addEventListener('touchend', () => isWalking = false);
+
+            // Picking mechanics
+            const raycaster = new THREE.Raycaster();
+            const mouse = new THREE.Vector2();
+            let pickedCount = 0;
+
+            function pickFlower(event) {
+                let clientX = event.clientX; let clientY = event.clientY;
+                if(event.changedTouches) { clientX = event.changedTouches[0].clientX; clientY = event.changedTouches[0].clientY; }
+                if (event.target === walkBtn || event.target === finalPageBtn) return;
+
+                mouse.x = (clientX / window.innerWidth) * 2 - 1;
+                mouse.y = -(clientY / window.innerHeight) * 2 + 1;
+
+                raycaster.setFromCamera(mouse, camera);
+                const intersects = raycaster.intersectObject(instancedMesh);
+
+                if (intersects.length > 0) {
+                    const instanceId = intersects[0].instanceId;
+                    instancedMesh.getMatrixAt(instanceId, dummy.matrix);
+                    dummy.matrix.decompose(dummy.position, dummy.rotation, dummy.scale);
+                    
+                    if (dummy.scale.x > 0) {
+                        dummy.scale.set(0, 0, 0); // Pick it
+                        dummy.updateMatrix();
+                        instancedMesh.setMatrixAt(instanceId, dummy.matrix);
+                        instancedMesh.instanceMatrix.needsUpdate = true;
+                        
+                        pickedCount++;
+                        scoreBoard.innerText = `Picked: ${pickedCount}`;
+                        scoreBoard.style.transform = "scale(1.2)";
+                        setTimeout(() => scoreBoard.style.transform = "scale(1)", 150);
+                    }
+                }
+            }
+
+            window.addEventListener('click', pickFlower);
+            window.addEventListener('touchstart', (e) => { if(e.target !== walkBtn && e.target !== finalPageBtn) pickFlower(e); }, {passive: false});
+
+            const clock = new THREE.Clock();
+            let checkIndex = 0;
+
+            function animate3D() {
+                requestAnimationFrame(animate3D);
+                const time = clock.getElapsedTime();
+                
+                if (isWalking) {
+                    camera.getWorldDirection(direction);
+                    direction.y = 0; direction.normalize();
+                    camera.position.addScaledVector(direction, walkSpeed);
+                    controls.target.addScaledVector(direction, walkSpeed);
+                }
+
+                if (material.userData.shader) {
+                    material.userData.shader.uniforms.time.value = time;
+                }
+
+                // DYNAMIC FIELD UPDATE (Javascript-based infinite wrap fixes picking bug)
+                let needsUpdate = false;
+                // Optimized update chunk (only check 100 flowers per frame to reduce CPU load)
+                for(let j=0; j<100; j++) { 
+                    let idx = (checkIndex + j) % FLOWER_COUNT;
+                    instancedMesh.getMatrixAt(idx, dummy.matrix);
+                    dummy.position.setFromMatrixPosition(dummy.matrix);
+                    
+                    let moved = false;
+                    if(camera.position.x - dummy.position.x > FIELD_SIZE/2) { dummy.position.x += FIELD_SIZE; moved = true; }
+                    else if(dummy.position.x - camera.position.x > FIELD_SIZE/2) { dummy.position.x -= FIELD_SIZE; moved = true; }
+                    
+                    if(camera.position.z - dummy.position.z > FIELD_SIZE/2) { dummy.position.z += FIELD_SIZE; moved = true; }
+                    else if(dummy.position.z - camera.position.z > FIELD_SIZE/2) { dummy.position.z -= FIELD_SIZE; moved = true; }
+
+                    if(moved) {
+                        instancedMesh.getMatrixAt(idx, dummy.matrix);
+                        dummy.matrix.decompose(dummy.position, dummy.rotation, dummy.scale);
+                        dummy.position.set(dummy.position.x, 0, dummy.position.z);
+                        dummy.scale.setScalar(Math.random() * 0.4 + 0.4); // Respawn new flower
+                        dummy.updateMatrix();
+                        instancedMesh.setMatrixAt(idx, dummy.matrix);
+                        needsUpdate = true;
+                    }
+                }
+                checkIndex = (checkIndex + 100) % FLOWER_COUNT;
+                
+                if(needsUpdate) {
+                    instancedMesh.instanceMatrix.needsUpdate = true;
+                    instancedMesh.computeBoundingSphere(); // CRITICAL for Raycaster (Picking)
+                }
+
+                controls.update();
+                renderer.render(scene, camera);
+            }
+            animate3D();
+
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        }
+    </script>
+</body>
+                                                                                                     </html>
