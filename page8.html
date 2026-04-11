@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Surprise Page</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Montserrat:wght@300;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --pink-glow: #ff007f;
+            --blue-glow: #00d2ff;
+            --bg-dark: #050505;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-dark);
+            color: #ffffff;
+            font-family: 'Montserrat', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+            perspective: 1000px;
+        }
+
+        /* --- Intro Screen --- */
+        #intro-screen {
+            text-align: center;
+            transition: all 1s ease;
+        }
+
+        .shiny-text {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3.5rem;
+            color: #fff;
+            text-transform: uppercase;
+            text-align: center;
+            /* Pink Shiny Glow */
+            text-shadow: 0 0 10px var(--pink-glow), 
+                         0 0 20px var(--pink-glow), 
+                         0 0 40px var(--pink-glow);
+            animation: shine 2s infinite alternate;
+            margin-bottom: 40px;
+        }
+
+        @keyframes shine {
+            from { opacity: 0.8; transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1.02); }
+        }
+
+        .play-btn {
+            background: transparent;
+            color: #fff;
+            border: 2px solid var(--pink-glow);
+            padding: 15px 50px;
+            font-size: 1.5rem;
+            font-family: 'Orbitron', sans-serif;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 0 15px var(--pink-glow);
+            transition: 0.3s;
+        }
+
+        .play-btn:hover {
+            background: var(--pink-glow);
+            box-shadow: 0 0 30px var(--pink-glow);
+            transform: translateY(-5px);
+        }
+
+        /* --- Lyrics Screen --- */
+        #lyrics-screen {
+            display: none;
+            width: 100%;
+            height: 100%;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .lyrics-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            max-width: 90%;
+            padding: 20px;
+        }
+
+        /* --- Beautiful Element Boxes --- */
+        .element-box {
+            width: 90px;
+            height: 110px;
+            background: rgba(20, 20, 20, 0.8);
+            border: 2px solid var(--blue-glow);
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 15px var(--blue-glow), inset 0 0 5px var(--blue-glow);
+            animation: entry 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            position: relative;
+        }
+
+        @keyframes entry {
+            from { opacity: 0; transform: translateY(20px) rotateX(-45deg); }
+            to { opacity: 1; transform: translateY(0) rotateX(0); }
+        }
+
+        .el-num {
+            position: absolute;
+            top: 5px;
+            left: 8px;
+            font-size: 0.7rem;
+            color: var(--blue-glow);
+        }
+
+        .el-sym {
+            font-size: 2.8rem;
+            font-weight: bold;
+            font-family: 'Orbitron', sans-serif;
+            color: #fff;
+            text-shadow: 0 0 5px #fff;
+        }
+
+        .el-name {
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #aaa;
+        }
+
+        /* --- Final Button --- */
+        #final-btn {
+            position: absolute;
+            bottom: 40px;
+            left: 40px;
+            padding: 12px 30px;
+            background: transparent;
+            border: 2px solid var(--blue-glow);
+            color: var(--blue-glow);
+            font-family: 'Orbitron', sans-serif;
+            border-radius: 5px;
+            cursor: pointer;
+            display: none;
+            box-shadow: 0 0 10px var(--blue-glow);
+            transition: 0.5s;
+        }
+
+        #final-btn:hover {
+            background: var(--blue-glow);
+            color: #000;
+        }
+
+    </style>
+</head>
+<body>
+
+    <audio id="bg-audio" src="Khayaal Talwiinder 320 Kbps_1.mp3"></audio>
+
+    <div id="intro-screen">
+        <h1 class="shiny-text">AAP KELIYE EK SURPRISE HAI</h1>
+        <button class="play-btn" id="start-trigger">click here</button>
+    </div>
+
+    <div id="lyrics-screen">
+        <div class="lyrics-container" id="lyrics-display"></div>
+    </div>
+
+    <button id="final-btn" onclick="location.href='final_page.html'">FINAL PAGE</button>
+
+    <script>
+        const audio = document.getElementById('bg-audio');
+        const trigger = document.getElementById('start-trigger');
+        const display = document.getElementById('lyrics-display');
+        const finalBtn = document.getElementById('final-btn');
+
+        // Mapping Data: Deeply researched for "Khayaal" lyrics
+        const songData = [
+            // Intro / Beat
+            { time: 13.1, sym: "Zn", n: "30", name: "Zinc" }, // Zulfaan
+            { time: 13.5, sym: "U", n: "92", name: "Uranium" }, // u
+            { time: 13.9, sym: "Li", n: "3", name: "Lithium" }, // l
+            { time: 14.3, sym: "F", n: "9", name: "Fluorine" }, // f
+            { time: 14.7, sym: "Ar", n: "18", name: "Argon" }, // a
+            { time: 15.1, sym: "N", n: "7", name: "Nitrogen" }, // n
+            
+            { time: 16.0, clear: true },
+
+            { time: 16.2, sym: "Δ", n: "Math", name: "Delta" }, // De
+            { time: 16.8, sym: "J", n: "Unit", name: "Joule" }, // Jaal
+            { time: 17.5, sym: "Al", n: "13", name: "Aluminum" }, // al
+            
+            { time: 18.2, clear: true },
+
+            { time: 18.5, sym: "Te", n: "52", name: "Tellurium" }, // Tere
+            { time: 19.1, sym: "Re", n: "75", name: "Rhenium" }, // re
+            { time: 19.5, sym: "Te", n: "52", name: "Tellurium" }, // Tere
+            { time: 20.0, sym: "Re", n: "75", name: "Rhenium" }, // re
+
+            { time: 21.0, clear: true },
+
+            // "Main aawan udd ke"
+            { time: 21.3, sym: "Mg", n: "12", name: "Magnesium" }, // Main
+            { time: 21.8, sym: "I", n: "53", name: "Iodine" }, // i
+            { time: 22.2, sym: "Au", n: "79", name: "Gold" }, // Aawan
+            { time: 22.8, sym: "W", n: "74", name: "Tungsten" }, // w
+            { time: 23.4, sym: "U", n: "92", name: "Uranium" }, // Udd
+            { time: 23.8, sym: "d", n: "∂", name: "Partial" }, // dd
+
+            { time: 25.0, clear: true },
+
+            // "Lai jaawan naal tainu"
+            { time: 25.3, sym: "La", n: "57", name: "Lanthanum" }, // Lai
+            { time: 25.8, sym: "Na", n: "11", name: "Sodium" }, // Naal
+            { time: 26.3, sym: "Al", n: "13", name: "Aluminum" }, // al
+            { time: 27.0, sym: "Ta", n: "73", name: "Tantalum" }, // Tainu
+            { time: 27.5, sym: "I", n: "53", name: "Iodine" }, // i
+            { time: 28.0, sym: "Nu", n: "ν", name: "Neutrino" }, // nu
+
+            // Adding more for full sync logic
+            { time: 30.0, clear: true },
+            { time: 31.0, sym: "∞", n: "Math", name: "Infinity" },
+            { time: 32.5, sym: "Σ", n: "Math", name: "Sigma" },
+            { time: 34.0, sym: "π", n: "3.14", name: "Pi" }
+        ];
+
+        let index = 0;
+
+        trigger.addEventListener('click', () => {
+            // Audio play must be inside this click event
+            audio.play().catch(e => console.error("Audio failed:", e));
+            
+            document.getElementById('intro-screen').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('intro-screen').style.display = 'none';
+                document.getElementById('lyrics-screen').style.display = 'flex';
+                startSync();
+            }, 1000);
+
+            // 10 Seconds Fade-in for Final Button
+            setTimeout(() => {
+                finalBtn.style.display = 'block';
+                setTimeout(() => finalBtn.style.opacity = '1', 50);
+            }, 10000);
+        });
+
+        function startSync() {
+            requestAnimationFrame(update);
+        }
+
+        function update() {
+            const currentTime = audio.currentTime;
+
+            if (index < songData.length) {
+                if (currentTime >= songData[index].time) {
+                    if (songData[index].clear) {
+                        display.innerHTML = '';
+                    } else {
+                        createBox(songData[index]);
+                    }
+                    index++;
+                }
+            }
+            requestAnimationFrame(update);
+        }
+
+        function createBox(data) {
+            const div = document.createElement('div');
+            div.className = 'element-box';
+            div.innerHTML = `
+                <div class="el-num">${data.n}</div>
+                <div class="el-sym">${data.sym}</div>
+                <div class="el-name">${data.name}</div>
+            `;
+            display.appendChild(div);
+        }
+    </script>
+</body>
+  </html>
