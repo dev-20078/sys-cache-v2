@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Surprise Page</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+:root {
+--pink-glow: #ff007f;
+--blue-glow: #00d2ff;
+--bg-dark: #050505;
+}
+
+body {
+margin: 0;
+padding: 0;
+background-color: var(--bg-dark);
+color: #ffffff;
+font-family: 'Montserrat', sans-serif;
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+height: 100vh;
+overflow: hidden;
+}
+
+#intro-screen {
+text-align: center;
+transition: all 1s ease;
+display: flex;
+flex-direction: column;
+align-items: center;
+}
+
+.shiny-text {
+font-family: 'Dancing Script', cursive; 
+font-size: 4rem;
+color: #fff;
+text-align: center;
+text-shadow: 0 0 10px var(--pink-glow), 
+             0 0 20px var(--pink-glow), 
+             0 0 30px #ff66b2;
+animation: breathe 2s infinite alternate;
+margin-bottom: 40px;
+line-height: 1.2;
+padding: 0 20px;
+}
+
+@keyframes breathe {
+from { opacity: 0.8; transform: scale(0.98); }
+to { opacity: 1; transform: scale(1.03); }
+}
+
+.play-btn {
+background: transparent;
+color: #fff;
+border: 2px solid var(--pink-glow);
+padding: 12px 40px;
+font-size: 1.2rem;
+font-family: 'Montserrat', sans-serif;
+font-weight: 600;
+border-radius: 50px;
+cursor: pointer;
+box-shadow: 0 0 15px var(--pink-glow);
+transition: 0.3s;
+}
+
+.play-btn:hover {
+background: var(--pink-glow);
+box-shadow: 0 0 30px var(--pink-glow);
+transform: translateY(-3px);
+}
+
+#lyrics-screen {
+display: none;
+width: 100%;
+height: 100%;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+}
+
+.lyrics-container {
+display: flex;
+flex-wrap: wrap;
+justify-content: center;
+gap: 15px;
+max-width: 90%;
+padding: 20px;
+}
+
+.element-box {
+width: 110px;
+height: 130px;
+background: rgba(10, 10, 15, 0.95);
+border: 2px solid var(--blue-glow);
+border-radius: 12px;
+position: relative;
+box-shadow: 0 0 15px var(--blue-glow), inset 0 0 8px var(--blue-glow);
+animation: entry .4s ease forwards;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+}
+
+@keyframes entry{
+from{opacity:0;transform:scale(.8)}
+to{opacity:1;transform:scale(1)}
+}
+
+.atomic-num{
+position:absolute;
+top:5px;
+left:8px;
+font-size:.7rem;
+color:var(--blue-glow);
+font-weight:bold;
+}
+
+.atomic-mass{
+position:absolute;
+top:5px;
+right:8px;
+font-size:.65rem;
+color:#aaa;
+}
+
+.symbol{
+font-size:2.4rem;
+font-weight:bold;
+}
+
+.el-title{
+font-size:.65rem;
+margin-top:3px;
+}
+
+.word{
+font-size:.6rem;
+opacity:.7;
+}
+
+#final-btn {
+position: absolute;
+bottom: 30px; 
+left: 50%;
+transform: translateX(-50%); 
+padding: 12px 30px;
+background: transparent;
+border: 2px solid var(--blue-glow);
+color: #fff;
+font-family: 'Montserrat', sans-serif;
+font-weight: bold;
+border-radius: 8px;
+cursor: pointer;
+display: none; 
+box-shadow: 0 0 15px var(--blue-glow), inset 0 0 5px var(--blue-glow);
+transition: 0.3s;
+z-index: 100; 
+}
+</style>
+</head>
+
+<body>
+
+<audio id="bg-audio" src="mec.mp3"></audio>
+
+<div id="intro-screen">
+<div class="shiny-text">AAP KELIYE EK SURPRISE HAI</div>
+<button class="play-btn" id="start-trigger">click here</button>
+</div>
+
+<div id="lyrics-screen">
+<div class="lyrics-container" id="lyrics-display"></div>
+</div>
+
+<button id="final-btn" onclick="location.href='final_page.html'">FINAL PAGE</button>
+
+<script>
+
+const audio = document.getElementById('bg-audio');
+const trigger = document.getElementById('start-trigger');
+const display = document.getElementById('lyrics-display');
+const finalBtn = document.getElementById('final-btn');
+
+const phrases = [
+
+{
+time:9.10,
+items:[
+{n:12,m:"24.31",s:"Mg",name:"Magnesium",w:"Main"},
+{n:79,m:"196.97",s:"Au",name:"Gold",w:"Avaan"},
+{n:92,m:"238.03",s:"U",name:"Uranium",w:"Ud"},
+{n:19,m:"39.09",s:"K",name:"Potassium",w:"Ke"},
+{n:57,m:"138.91",s:"La",name:"Lanthanum",w:"Le"},
+{n:"",m:"",s:"J",name:"Joule",w:"Jawan"},
+{n:11,m:"22.99",s:"Na",name:"Sodium",w:"Nal"},
+{n:73,m:"180.95",s:"Ta",name:"Tantalum",w:"Tenu"},
+{n:73,m:"180.95",s:"Ta",name:"Tantalum",w:"Tenu"}
+]
+},
+
+{
+time:13.90,
+items:[
+{n:12,m:"24.31",s:"Mg",name:"Magnesium",w:"Main"},
+{n:79,m:"196.97",s:"Au",name:"Gold",w:"Avaan"},
+{n:92,m:"238.03",s:"U",name:"Uranium",w:"Ud"},
+{n:19,m:"39.09",s:"K",name:"Potassium",w:"Ke"},
+{n:57,m:"138.91",s:"La",name:"Lanthanum",w:"Le"},
+{n:"",m:"",s:"J",name:"Joule",w:"Jawan"},
+{n:11,m:"22.99",s:"Na",name:"Sodium",w:"Nal"},
+{n:73,m:"180.95",s:"Ta",name:"Tantalum",w:"Tenu"}
+]
+},
+
+{
+time:18.50,
+items:[
+{s:"J",name:"Joule",w:"Je"},
+{s:"Na",n:11,m:"22.99",name:"Sodium",w:"Na"},
+{s:"Tm",n:69,m:"168.93",name:"Thulium",w:"Tu"},
+{s:"I",n:53,m:"126.90",name:"Iodine",w:"Ayi"},
+{s:"K",n:19,m:"39.09",name:"Potassium",w:"Khayal"},
+{s:"Au",n:79,m:"196.97",name:"Gold",w:"Aune"},
+{s:"Mn",n:25,m:"54.93",name:"Manganese",w:"Mainu"}
+]
+},
+
+{
+time:23.50,
+items:[
+{s:"Ta",n:73,m:"180.95",name:"Tantalum",w:"Tenu"},
+{s:"Mg",n:12,m:"24.31",name:"Magnesium",w:"Main"},
+{s:"J",name:"Joule",w:"Je"},
+{s:"Δ",name:"Delta",w:"Dil"},
+{s:"Δt",name:"Delta Time",w:"Ditta"},
+{s:"Sm",n:62,m:"150.36",name:"Samarium",w:"Sambhal"},
+{s:"La",n:57,m:"138.91",name:"Lanthanum",w:"Layengi"},
+{s:"In",n:49,m:"114.82",name:"Indium",w:"Ehnu"},
+{s:"In",n:49,m:"114.82",name:"Indium",w:"Ehnu"}
+]
+},
+
+{
+time:28.40,
+items:[
+{s:"Ni",n:28,m:"58.69",name:"Nickel",w:"Ni"},
+{s:"J",name:"Joule",w:"Je"},
+{s:"Δ",name:"Delta",w:"Dil"},
+{s:"Δt",name:"Delta Time",w:"Ditta"},
+{s:"Sm",n:62,m:"150.36",name:"Samarium",w:"Sambhal"},
+{s:"La",n:57,m:"138.91",name:"Lanthanum",w:"Layengi"},
+{s:"In",n:49,m:"114.82",name:"Indium",w:"Ehnu"}
+]
+},
+
+{
+time:32.80,
+items:[
+{s:"J",name:"Joule",w:"Je"},
+{s:"Y",n:39,m:"88.90",name:"Yttrium",w:"Yari"},
+{s:"τ",name:"Tau",w:"Torhi"},
+{s:"K",n:19,m:"39.09",name:"Potassium",w:"Khayal"},
+{s:"Au",n:79,m:"196.97",name:"Gold",w:"Aune"},
+{s:"Ta",n:73,m:"180.95",name:"Tantalum",w:"Tenu"},
+{s:"Ta",n:73,m:"180.95",name:"Tantalum",w:"Tenu"}
+]
+},
+
+{
+time:38.00,
+items:[
+{s:"Mg",n:12,m:"24.31",name:"Magnesium",w:"Main"},
+{s:"Te",n:52,m:"127.60",name:"Tellurium",w:"Tera"},
+{s:"Ho",n:67,m:"164.93",name:"Holmium",w:"Hoya"},
+{s:"Sm",n:62,m:"150.36",name:"Samarium",w:"Sambhal"},
+{s:"La",n:57,m:"138.91",name:"Lanthanum",w:"Le"},
+{s:"Tm",n:69,m:"168.93",name:"Thulium",w:"Tu"},
+{s:"Mg",n:12,m:"24.31",name:"Magnesium",w:"Mainu"},
+{s:"Mg",n:12,m:"24.31",name:"Magnesium",w:"Mainu"}
+]
+},
+
+{
+time:42.60,
+items:[
+{s:"Mg",n:12,m:"24.31",name:"Magnesium",w:"Main"},
+{s:"Te",n:52,m:"127.60",name:"Tellurium",w:"Tera"},
+{s:"Ho",n:67,m:"164.93",name:"Holmium",w:"Hoya"},
+{s:"Sm",n:62,m:"150.36",name:"Samarium",w:"Sambhal"},
+{s:"La",n:57,m:"138.91",name:"Lanthanum",w:"Le"},
+{s:"Tm",n:69,m:"168.93",name:"Thulium",w:"Tu"},
+{s:"Mg",n:12,m:"24.31",name:"Magnesium",w:"Mainu"},
+{s:"Mg",n:12,m:"24.31",name:"Magnesium",w:"Mainu"}
+]
+}
+
+];
+
+let i=0;
+
+trigger.onclick=()=>{
+audio.play()
+
+document.getElementById('intro-screen').style.opacity='0';
+
+setTimeout(()=>{
+intro-screen.style.display='none'
+lyrics-screen.style.display='flex'
+loop()
+},500)
+
+setTimeout(()=>{
+finalBtn.style.display='block'
+},10000)
+
+}
+
+function loop(){
+const t=audio.currentTime
+
+if(i<phrases.length && t>=phrases[i].time){
+renderPhrase(phrases[i])
+i++
+}
+
+requestAnimationFrame(loop)
+}
+
+function renderPhrase(p){
+
+clearBoxes()
+
+p.items.forEach(x=>{
+const d=document.createElement('div')
+d.className='element-box'
+
+d.innerHTML=`
+<div class="atomic-num">${x.n||""}</div>
+<div class="atomic-mass">${x.m||""}</div>
+<div class="symbol">${x.s}</div>
+<div class="el-title">${x.name}</div>
+<div class="word">${x.w}</div>
+`
+
+display.appendChild(d)
+
+})
+
+}
+
+function clearBoxes(){
+
+const b=document.querySelectorAll('.element-box')
+
+b.forEach(e=>{
+e.style.transition=".4s"
+e.style.opacity="0"
+e.style.filter="blur(6px)"
+})
+
+setTimeout(()=>display.innerHTML='',400)
+
+}
+
+</script>
+
+</body>
+  </html>
