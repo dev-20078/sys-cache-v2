@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Surprise Page</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+:root {
+--pink-glow: #ff007f;
+--blue-glow: #00d2ff;
+--bg-dark: #050505;
+}
+
+body {
+margin: 0;
+padding: 0;
+background-color: var(--bg-dark);
+color: #ffffff;
+font-family: 'Montserrat', sans-serif;
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+height: 100vh;
+overflow: hidden;
+}
+
+#intro-screen {
+text-align: center;
+transition: all 1s ease;
+display: flex;
+flex-direction: column;
+align-items: center;
+}
+
+.shiny-text {
+font-family: 'Dancing Script', cursive;
+font-size: 4rem;
+color: #fff;
+text-align: center;
+text-shadow: 0 0 10px var(--pink-glow),
+0 0 20px var(--pink-glow),
+0 0 30px #ff66b2;
+animation: breathe 2s infinite alternate;
+margin-bottom: 40px;
+line-height: 1.2;
+padding: 0 20px;
+}
+
+@keyframes breathe {
+from { opacity: 0.8; transform: scale(0.98); }
+to { opacity: 1; transform: scale(1.03); }
+}
+
+.play-btn {
+background: transparent;
+color: #fff;
+border: 2px solid var(--pink-glow);
+padding: 12px 40px;
+font-size: 1.2rem;
+font-family: 'Montserrat', sans-serif;
+font-weight: 600;
+border-radius: 50px;
+cursor: pointer;
+box-shadow: 0 0 15px var(--pink-glow);
+transition: 0.3s;
+}
+
+.play-btn:hover {
+background: var(--pink-glow);
+box-shadow: 0 0 30px var(--pink-glow);
+transform: translateY(-3px);
+}
+
+#lyrics-screen {
+display: none;
+width: 100%;
+height: 100%;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+}
+
+.lyrics-container {
+display: flex;
+flex-wrap: wrap;
+justify-content: center;
+gap: 15px;
+max-width: 90%;
+padding: 20px;
+}
+
+.element-box {
+width: 95px;
+height: 110px;
+background: rgba(10, 10, 15, 0.9);
+border: 2px solid var(--blue-glow);
+border-radius: 12px;
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+box-shadow: 0 0 15px var(--blue-glow), inset 0 0 8px var(--blue-glow);
+animation: entry 0.45s ease forwards;
+position: relative;
+}
+
+@keyframes entry {
+from {
+opacity:0;
+transform:translateY(15px) scale(.85);
+}
+to {
+opacity:1;
+transform:translateY(0) scale(1);
+}
+}
+
+.el-num {
+position:absolute;
+top:5px;
+left:8px;
+font-size:.65rem;
+color:var(--blue-glow);
+font-weight:bold;
+}
+
+.el-sym {
+font-size:2.5rem;
+font-weight:bold;
+font-family:'Montserrat',sans-serif;
+color:#fff;
+text-shadow:0 0 8px #ffffff;
+}
+
+.el-name {
+font-size:.55rem;
+text-transform:uppercase;
+letter-spacing:1px;
+color:#ccc;
+margin-top:5px;
+text-align:center;
+}
+
+#final-btn {
+position:absolute;
+bottom:30px;
+left:50%;
+transform:translateX(-50%);
+padding:12px 30px;
+background:transparent;
+border:2px solid var(--blue-glow);
+color:#fff;
+font-family:'Montserrat',sans-serif;
+font-weight:bold;
+border-radius:8px;
+cursor:pointer;
+display:none;
+box-shadow:0 0 15px var(--blue-glow), inset 0 0 5px var(--blue-glow);
+transition:.3s;
+z-index:100;
+}
+
+#final-btn:hover {
+background:var(--blue-glow);
+color:#000;
+box-shadow:0 0 25px var(--blue-glow);
+}
+</style>
+</head>
+
+<body>
+
+<audio id="bg-audio" src="mec.mp3"></audio>
+
+<div id="intro-screen">
+<div class="shiny-text">AAP KELIYE EK SURPRISE HAI</div>
+<button class="play-btn" id="start-trigger">click here</button>
+</div>
+
+<div id="lyrics-screen">
+<div class="lyrics-container" id="lyrics-display"></div>
+</div>
+
+<button id="final-btn" onclick="location.href='final_page.html'">FINAL PAGE</button>
+
+<script>
+
+const audio = document.getElementById('bg-audio');
+const trigger = document.getElementById('start-trigger');
+const display = document.getElementById('lyrics-display');
+const finalBtn = document.getElementById('final-btn');
+
+const gap = .38;
+
+const songData = [
+
+/* 9.10 Main Avaan Ud Ke */
+{time:9.10,sym:"Mg",n:"12",name:"Magnesium (Main)"},
+{time:9.10+gap,sym:"Au",n:"79",name:"Gold (Avaan)"},
+{time:9.10+gap*2,sym:"U",n:"92",name:"Uranium (Ud)"},
+{time:9.10+gap*3,sym:"K",n:"19",name:"Potassium (Ke)"},
+{time:10.60,clear:true},
+
+/* 10.70 */
+{time:10.70,sym:"La",n:"57",name:"Lanthanum (Le)"},
+{time:10.70+gap,sym:"J",n:"Math",name:"Joule (Jawan)"},
+{time:10.70+gap*2,sym:"Na",n:"11",name:"Sodium (Nal)"},
+{time:10.70+gap*3,sym:"Ta",n:"73",name:"Tantalum (Tenu)"},
+{time:10.70+gap*4,sym:"Ta",n:"73",name:"Tantalum (Tenu)"},
+{time:13.80,clear:true},
+
+/* 13.90 */
+{time:13.90,sym:"Mg",n:"12",name:"Magnesium (Main)"},
+{time:13.90+gap,sym:"Au",n:"79",name:"Gold (Avaan)"},
+{time:13.90+gap*2,sym:"U",n:"92",name:"Uranium (Ud)"},
+{time:13.90+gap*3,sym:"K",n:"19",name:"Potassium (Ke)"},
+{time:15.40,clear:true},
+
+/* 15.50 */
+{time:15.50,sym:"La",n:"57",name:"Lanthanum (Le)"},
+{time:15.50+gap,sym:"J",n:"Math",name:"Joule (Jawan)"},
+{time:15.50+gap*2,sym:"Na",n:"11",name:"Sodium (Nal)"},
+{time:15.50+gap*3,sym:"Ta",n:"73",name:"Tantalum (Tenu)"},
+{time:18.40,clear:true},
+
+/* 18.50 */
+{time:18.50,sym:"J",n:"Math",name:"Joule (Je)"},
+{time:18.50+gap,sym:"Na",n:"11",name:"Sodium (Na)"},
+{time:18.50+gap*2,sym:"Tm",n:"69",name:"Thulium (Tu)"},
+{time:18.50+gap*3,sym:"I",n:"53",name:"Iodine (Ayi)"},
+{time:20.20,clear:true},
+
+/* 20.30 */
+{time:20.30,sym:"K",n:"19",name:"Potassium (Khayal)"},
+{time:20.30+gap,sym:"Au",n:"79",name:"Gold (Aune)"},
+{time:20.30+gap*2,sym:"Mn",n:"25",name:"Manganese (Mainu)"},
+{time:23.40,clear:true},
+
+/* 23.50 */
+{time:23.50,sym:"Ta",n:"73",name:"Tantalum (Tenu)"},
+{time:23.50+gap,sym:"Mg",n:"12",name:"Magnesium (Main)"},
+{time:23.50+gap*2,sym:"J",n:"Math",name:"Joule (Je)"},
+{time:23.50+gap*3,sym:"D",n:"Math",name:"Derivative (Dil)"},
+{time:23.50+gap*4,sym:"Δt",n:"Math",name:"Delta Time (Ditta)"},
+{time:25.10,clear:true},
+
+/* 25.20 */
+{time:25.20,sym:"Sm",n:"62",name:"Samarium (Sambhal)"},
+{time:25.20+gap,sym:"La",n:"57",name:"Lanthanum (Layengi)"},
+{time:25.20+gap*2,sym:"In",n:"49",name:"Indium (Ehnu)"},
+{time:25.20+gap*3,sym:"In",n:"49",name:"Indium (Ehnu)"},
+{time:28.30,clear:true},
+
+/* 28.40 */
+{time:28.40,sym:"Ni",n:"28",name:"Nickel (Ni)"},
+{time:28.40+gap,sym:"J",n:"Math",name:"Joule (Je)"},
+{time:28.40+gap*2,sym:"D",n:"Math",name:"Derivative (Dil)"},
+{time:28.40+gap*3,sym:"Δt",n:"Math",name:"Delta Time (Ditta)"},
+{time:30.00,clear:true},
+
+/* 30.10 */
+{time:30.10,sym:"Sm",n:"62",name:"Samarium (Sambhal)"},
+{time:30.10+gap,sym:"La",n:"57",name:"Lanthanum (Layengi)"},
+{time:30.10+gap*2,sym:"In",n:"49",name:"Indium (Ehnu)"},
+{time:32.70,clear:true},
+
+/* 32.80 */
+{time:32.80,sym:"J",n:"Math",name:"Joule (Je)"},
+{time:32.80+gap,sym:"Y",n:"39",name:"Yttrium (Yari)"},
+{time:32.80+gap*2,sym:"τ",n:"Math",name:"Tau (Torhi)"},
+{time:34.70,clear:true},
+
+/* 34.80 */
+{time:34.80,sym:"K",n:"19",name:"Potassium (Khayal)"},
+{time:34.80+gap,sym:"Au",n:"79",name:"Gold (Aune)"},
+{time:34.80+gap*2,sym:"Ta",n:"73",name:"Tantalum (Tenu)"},
+{time:34.80+gap*3,sym:"Ta",n:"73",name:"Tantalum (Tenu)"},
+{time:37.90,clear:true},
+
+/* 38 */
+{time:38.00,sym:"Mg",n:"12",name:"Magnesium (Main)"},
+{time:38.00+gap,sym:"Te",n:"52",name:"Tellurium (Tera)"},
+{time:38.00+gap*2,sym:"Ho",n:"67",name:"Holmium (Hoya)"},
+{time:39.40,clear:true},
+
+/* 39.5 */
+{time:39.50,sym:"Sm",n:"62",name:"Samarium (Sambhal)"},
+{time:39.50+gap,sym:"La",n:"57",name:"Lanthanum (Le)"},
+{time:39.50+gap*2,sym:"Tm",n:"69",name:"Thulium (Tu)"},
+{time:39.50+gap*3,sym:"Mg",n:"12",name:"Magnesium (Mainu)"},
+{time:39.50+gap*4,sym:"Mg",n:"12",name:"Magnesium (Mainu)"},
+{time:42.50,clear:true},
+
+/* 42.60 */
+{time:42.60,sym:"Mg",n:"12",name:"Magnesium (Main)"},
+{time:42.60+gap,sym:"Te",n:"52",name:"Tellurium (Tera)"},
+{time:42.60+gap*2,sym:"Ho",n:"67",name:"Holmium (Hoya)"},
+{time:44.40,clear:true},
+
+/* 44.50 */
+{time:44.50,sym:"Sm",n:"62",name:"Samarium (Sambhal)"},
+{time:44.50+gap,sym:"La",n:"57",name:"Lanthanum (Le)"},
+{time:44.50+gap*2,sym:"Tm",n:"69",name:"Thulium (Tu)"},
+{time:44.50+gap*3,sym:"Mg",n:"12",name:"Magnesium (Mainu)"},
+{time:44.50+gap*4,sym:"Mg",n:"12",name:"Magnesium (Mainu)"}
+
+];
+
+let index=0;
+
+trigger.addEventListener('click',()=>{
+
+audio.play();
+
+document.getElementById('intro-screen').style.opacity='0';
+
+setTimeout(()=>{
+document.getElementById('intro-screen').style.display='none';
+document.getElementById('lyrics-screen').style.display='flex';
+startSync();
+},500);
+
+setTimeout(()=>{
+finalBtn.style.display='block';
+setTimeout(()=>finalBtn.style.opacity='1',50);
+},10000);
+
+});
+
+function startSync(){
+requestAnimationFrame(update);
+}
+
+function update(){
+
+const currentTime=audio.currentTime;
+
+while(index<songData.length && currentTime>=songData[index].time-.05){
+
+if(songData[index].clear){
+blurClear();
+}else{
+createBox(songData[index]);
+}
+
+index++;
+}
+
+requestAnimationFrame(update);
+}
+
+function blurClear(){
+
+const boxes=document.querySelectorAll('.element-box');
+
+boxes.forEach(box=>{
+box.style.transition=".45s";
+box.style.opacity="0";
+box.style.filter="blur(8px)";
+box.style.transform="scale(.9)";
+});
+
+setTimeout(()=>{
+display.innerHTML='';
+},450);
+
+}
+
+function createBox(data){
+
+const div=document.createElement('div');
+
+div.className='element-box';
+
+div.innerHTML=`
+<div class="el-num">${data.n||""}</div>
+<div class="el-sym">${data.sym}</div>
+<div class="el-name">${data.name}</div>
+`;
+
+display.appendChild(div);
+
+}
+
+</script>
+
+</body>
+  </html>
