@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Surprise Page</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --pink-glow: #ff007f;
+  --blue-glow: #00d2ff;
+  --bg-dark: #050505;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg-dark);
+  color: white;
+  font-family: Montserrat;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  overflow: hidden;
+  flex-direction: column;
+}
+
+#intro-screen {
+  text-align: center;
+  z-index: 20;
+}
+
+.shiny-text {
+  font-family: 'Dancing Script', cursive;
+  font-size: 3rem;
+  text-shadow: 0 0 20px #ff007f;
+  margin-bottom: 40px;
+  padding: 0 20px;
+}
+
+.play-btn {
+  background: #ff007f;
+  color: white;
+  border: none;
+  padding: 14px 40px;
+  border-radius: 40px;
+  font-size: 18px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.play-btn:hover {
+  box-shadow: 0 0 15px #ff007f;
+  transform: scale(1.05);
+}
+
+/* Lyrics Screen */
+#lyrics-screen {
+  display: none;
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  z-index: 5;
+  flex-direction: column;
+}
+
+.lyrics-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px; /* Gap between words */
+  justify-content: center;
+  max-width: 95%;
+  align-items: center;
+}
+
+/* Grouping letters of a word together */
+.word-group {
+  display: flex;
+  gap: 3px; /* Gap between letters */
+}
+
+/* Smaller tile for portrait mode */
+.element-box {
+  width: 40px;
+  height: 55px;
+  border: 1px solid var(--blue-glow);
+  border-radius: 6px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 8px rgba(0, 210, 255, 0.5);
+  background: rgba(0, 0, 0, 0.6);
+  animation: pop .4s ease forwards;
+}
+
+@keyframes pop {
+  from { opacity: 0; transform: scale(.7); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.atomic-num { position: absolute; top: 2px; left: 3px; font-size: 7px; color: #00d2ff; }
+.atomic-mass { position: absolute; top: 2px; right: 3px; font-size: 7px; }
+.symbol { font-size: 22px; font-weight: bold; margin-top: 4px; }
+.el-title { font-size: 6.5px; text-transform: uppercase; color: #ff007f; margin-top: 3px; font-weight: bold; text-align: center; width: 100%; letter-spacing: 0.5px;}
+
+/* Glowing Blue Final Page Button */
+.final-btn {
+  display: none;
+  background: transparent;
+  color: white;
+  border: 2px solid var(--blue-glow);
+  padding: 15px 40px;
+  border-radius: 40px;
+  font-size: 20px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  cursor: pointer;
+  margin-top: 50px;
+  box-shadow: 0 0 15px var(--blue-glow), inset 0 0 10px var(--blue-glow);
+  text-shadow: 0 0 10px var(--blue-glow);
+  animation: pop 0.5s ease forwards, pulse-blue 1.5s infinite 0.5s;
+  transition: 0.3s;
+}
+
+.final-btn:hover {
+  box-shadow: 0 0 25px var(--blue-glow), inset 0 0 20px var(--blue-glow);
+  transform: scale(1.05);
+  background: rgba(0, 210, 255, 0.1);
+}
+
+@keyframes pulse-blue {
+  0%, 100% { box-shadow: 0 0 15px var(--blue-glow), inset 0 0 10px var(--blue-glow); }
+  50% { box-shadow: 0 0 25px var(--blue-glow), inset 0 0 20px var(--blue-glow); }
+}
+
+</style>
+</head>
+
+<body>
+
+<audio id="bg-audio" src="mec.mp3"></audio>
+
+<div id="intro-screen">
+  <div class="shiny-text">AAP KELIYE EK SURPRISE HAI</div>
+  <button class="play-btn" id="start-trigger">click here</button>
+</div>
+
+<div id="lyrics-screen">
+  <div class="lyrics-container" id="lyrics-display"></div>
+  <button id="final-page-btn" class="final-btn" onclick="goToFinalPage()">FINAL PAGE</button>
+</div>
+
+<script>
+const audio = document.getElementById("bg-audio");
+const trigger = document.getElementById("start-trigger");
+const display = document.getElementById("lyrics-display");
+const finalBtn = document.getElementById("final-page-btn");
+
+// Mapping dictionary for every letter (Mix of Chem elements and Physics/Math symbols)
+const letterMap = {
+  'A': { s: "A", name: "Ampere", t: "p" },
+  'B': { s: "B", name: "Boron", n: 5, m: "10.81", t: "c" },
+  'C': { s: "C", name: "Carbon", n: 6, m: "12.01", t: "c" },
+  'D': { s: "Δ", name: "Delta", t: "p" },
+  'E': { s: "E", name: "Energy", t: "p" },
+  'F': { s: "F", name: "Fluorine", n: 9, m: "19.00", t: "c" },
+  'G': { s: "G", name: "Gravity", t: "p" },
+  'H': { s: "H", name: "Hydrogen", n: 1, m: "1.00", t: "c" },
+  'I': { s: "I", name: "Iodine", n: 53, m: "126.9", t: "c" },
+  'J': { s: "J", name: "Joule", t: "p" },
+  'K': { s: "K", name: "Potassium", n: 19, m: "39.09", t: "c" },
+  'L': { s: "L", name: "Inductance", t: "p" },
+  'M': { s: "M", name: "Mass", t: "p" },
+  'N': { s: "N", name: "Nitrogen", n: 7, m: "14.00", t: "c" },
+  'O': { s: "O", name: "Oxygen", n: 8, m: "16.00", t: "c" },
+  'P': { s: "P", name: "Phosphorus", n: 15, m: "30.97", t: "c" },
+  'Q': { s: "Q", name: "Charge", t: "p" },
+  'R': { s: "R", name: "Resistance", t: "p" },
+  'S': { s: "S", name: "Sulfur", n: 16, m: "32.06", t: "c" },
+  'T': { s: "T", name: "Time", t: "p" },
+  'U': { s: "U", name: "Uranium", n: 92, m: "238.0", t: "c" },
+  'V': { s: "V", name: "Vanadium", n: 23, m: "50.94", t: "c" },
+  'W': { s: "W", name: "Tungsten", n: 74, m: "183.8", t: "c" },
+  'X': { s: "x", name: "Variable", t: "p" },
+  'Y': { s: "Y", name: "Yttrium", n: 39, m: "88.90", t: "c" },
+  'Z': { s: "Z", name: "Impedance", t: "p" }
+};
+
+// Simple list of phrases with their timings
+const phrases = [
+  { time: 9.10, text: "Main Avaan Ud Ke" },
+  { time: 10.70, text: "Le Jawan Nal Tenu Tenu" },
+  { time: 13.90, text: "Main Avaan Ud Ke" },
+  { time: 15.50, text: "Le Jawan Nal Tenu" },
+  { time: 18.50, text: "Je Na Tu Ayi" },
+  { time: 20.30, text: "Khayal Aune Mainu" },
+  { time: 23.50, text: "Tenu Main Je Dil Ditta" },
+  { time: 25.20, text: "Sambhal Layengi Ehnu Ehnu" },
+  { time: 28.40, text: "Ni Je Dil Ditta" },
+  { time: 30.10, text: "Sambhal Layengi Ehnu" },
+  { time: 32.80, text: "Je Yari Torhi" },
+  { time: 34.80, text: "Khayal Aune Tenu Tenu" },
+  { time: 38.00, text: "Main Tera Hoya" },
+  { time: 39.50, text: "Sambhal Le Tu Mainu Mainu" },
+  { time: 42.60, text: "Main Tera Hoya" },
+  { time: 44.50, text: "Sambhal Le Tu Mainu Mainu" }
+];
+
+let index = 0;
+let finalBtnShown = false;
+
+trigger.onclick = () => {
+  audio.play();
+  document.getElementById("intro-screen").style.display = "none";
+  document.getElementById("lyrics-screen").style.display = "flex";
+  requestAnimationFrame(loop);
+};
+
+function loop() {
+  const t = audio.currentTime;
+
+  if (index < phrases.length && t >= phrases[index].time) {
+    showPhrase(phrases[index].text);
+    index++;
+  }
+
+  // Show final button near the end
+  if (t >= 48.0 && !finalBtnShown) {
+    finalBtnShown = true;
+    finalBtn.style.display = "block";
+  }
+
+  requestAnimationFrame(loop);
+}
+
+function showPhrase(text) {
+  if (display.innerHTML.trim() !== "") {
+    fadeClear(() => {
+      createLetterTiles(text);
+    });
+  } else {
+    createLetterTiles(text);
+  }
+}
+
+function createLetterTiles(text) {
+  // Split phrase into words
+  const words = text.split(" ");
+  
+  words.forEach(word => {
+    // Create a container for each word
+    const wordGroup = document.createElement("div");
+    wordGroup.className = "word-group";
+    
+    // Create a tile for each letter in the word
+    for(let i=0; i<word.length; i++) {
+      const char = word[i].toUpperCase();
+      const mapping = letterMap[char];
+      
+      if(mapping) {
+        const d = document.createElement("div");
+        d.className = "element-box";
+        
+        // If Chemistry element, show Atomic Number and Mass, else keep blank
+        const atomicNumHTML = mapping.t === 'c' ? `<div class="atomic-num">${mapping.n}</div>` : '';
+        const atomicMassHTML = mapping.t === 'c' ? `<div class="atomic-mass">${mapping.m}</div>` : '';
+        
+        d.innerHTML = `
+          ${atomicNumHTML}
+          ${atomicMassHTML}
+          <div class="symbol">${mapping.s}</div>
+          <div class="el-title">${mapping.name}</div>
+        `;
+        wordGroup.appendChild(d);
+      }
+    }
+    
+    display.appendChild(wordGroup);
+  });
+}
+
+function fadeClear(callback) {
+  const b = document.querySelectorAll(".element-box");
+  b.forEach(e => {
+    e.style.transition = ".3s ease";
+    e.style.opacity = "0";
+    e.style.filter = "blur(6px)";
+    e.style.transform = "scale(0.8)";
+  });
+
+  setTimeout(() => {
+    display.innerHTML = "";
+    if (callback) callback();
+  }, 300);
+}
+
+function goToFinalPage() {
+  window.location.href = "page9.html"; 
+}
+</script>
+
+</body>
+  </html>
